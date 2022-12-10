@@ -1,5 +1,5 @@
 import mysql.connector
-from main import User
+from main import get_user
 
 mydb = mysql.connector.connect(
     host="127.0.0.1",
@@ -10,7 +10,7 @@ mydb = mysql.connector.connect(
 mycursor = mydb.cursor()
 
 sql = "INSERT INTO user (name, password) VALUES (%s, %s)"
-val = (User.get_username, User.get_password) 
+val = (get_user().get_username(), get_user().get_password()) 
 mycursor.execute(sql, val)
 
 mydb.commit()

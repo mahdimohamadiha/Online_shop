@@ -1,3 +1,4 @@
+from api import sign_up
 class User:
     def __init__(self, username, password):
         self.username = username
@@ -9,4 +10,8 @@ class User:
     def get_password(self):
         return self.password
         
-User("mahdimohamadiha", "mahdi81")        
+user = User(sign_up(), sign_up())   
+
+def get_user():
+    return user
+     
