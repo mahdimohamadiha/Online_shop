@@ -10,7 +10,7 @@ class User:
     def get_password(self):
         return self.password
         
-user = User(sign_up(), sign_up())   
+user = User(sign_up()[0], sign_up()[1])   
 
 def get_user():
     return user

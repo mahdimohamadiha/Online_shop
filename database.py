@@ -3,9 +3,9 @@ from main import get_user
 
 mydb = mysql.connector.connect(
     host="127.0.0.1",
-    user="Ali",
+    user="root",
     passwd="AMA994631",
-    database="Test"
+    database="online_shop"
 ) 
 mycursor = mydb.cursor()
 
