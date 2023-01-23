@@ -3,6 +3,7 @@ import 'package:online_shop/Profile.dart';
 import 'package:online_shop/home-page.dart';
 import 'package:online_shop/product.dart';
 import 'package:online_shop/search_bar.dart';
+import 'package:online_shop/shoppingCardPage.dart';
 
 import 'ProfilePage.dart';
 
@@ -18,9 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.grey,
-      ),
+      theme: ThemeData(useMaterial3: true, primarySwatch: Colors.grey),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
@@ -29,19 +28,20 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
   final String title;
+  static int selectedIndex = 1;
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState(selectedIndex);
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   static const List<Widget> _widgetOptions = <Widget>[
-    Text('Search Page',
-        style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold)),
+    ShoppingCartPage(),
     homePage(),
     ProfilePage(),
   ];
+  int _selectedIndex;
 
-  int _selectedIndex = 1;
+  _MyHomePageState(this._selectedIndex) {}
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -54,8 +54,8 @@ class _MyHomePageState extends State<MyHomePage> {
         bottomNavigationBar: BottomNavigationBar(
             items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                  label: 'search',
-                  icon: Icon(Icons.search),
+                  label: 'shopping card',
+                  icon: Icon(Icons.shopping_cart),
                   backgroundColor: Colors.grey[450]),
               BottomNavigationBarItem(
                   label: 'home',
@@ -98,11 +98,13 @@ class _MyHomePageState extends State<MyHomePage> {
             slivers: [
               SliverToBoxAdapter(
                 child: SizedBox(
-                  height: 500,
-                  child: Center(
-                    child: _widgetOptions.elementAt(_selectedIndex),
-                  ),
-                ),
+                    height: 500,
+                    child: Center(
+                      child: _widgetOptions.elementAt(_selectedIndex),
+                      //   child: IndexedStack(
+                      // children: _widgetOptions,
+                      // index: _selectedIndex,
+                    )),
               ),
             ],
           ),
