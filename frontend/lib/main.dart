@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:online_shop/Profile.dart';
+import 'package:online_shop/user.dart';
 import 'package:online_shop/home-page.dart';
 import 'package:online_shop/product.dart';
 import 'package:online_shop/search_bar.dart';
@@ -73,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
             showSelectedLabels: true,
             selectedItemColor: Colors.black,
             backgroundColor: Colors.grey,
-            iconSize: 40,
+            iconSize: 30,
             onTap: _onItemTapped,
             elevation: 5),
         appBar: AppBar(
@@ -98,7 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
             slivers: [
               SliverToBoxAdapter(
                 child: SizedBox(
-                    height: 500,
+                    height: 550,
                     child: Center(
                       child: _widgetOptions.elementAt(_selectedIndex),
                       //   child: IndexedStack(

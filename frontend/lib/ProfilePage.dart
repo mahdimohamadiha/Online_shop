@@ -1,20 +1,189 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:online_shop/user.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
   @override
   State<ProfilePage> createState() => _ProfilePageState();
   static bool logedIn = false;
+  static User user =
+      User('email', 'fullName', 'city', 'phone', 'password', 'address');
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  @override
+  Widget build(BuildContext context) {
+    if (ProfilePage.logedIn) {
+      return Userprofile(onLogedIn: () {
+        setState(() {});
+      });
+    } else {
+      return LoginPage(
+        onLogedIn: () {
+          setState(() {});
+        },
+      );
+    }
+  }
+}
+
+class Userprofile extends StatefulWidget {
+  const Userprofile({Key? key, required this.onLogedIn}) : super(key: key);
+  final Function onLogedIn;
+  @override
+  State<Userprofile> createState() => _UserprofileState(this.onLogedIn);
+}
+
+class _UserprofileState extends State<Userprofile> {
+  TextStyle _textStyle = TextStyle(fontSize: 20);
+  Function _function;
+  _UserprofileState(this._function);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[300],
+      body: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Column(
+          children: [
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 60, vertical: 20),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(120),
+                child: Image.asset(
+                  'asset/image/profile.png',
+                  width: 120,
+                  height: 120,
+                ),
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'full name :',
+                        style: _textStyle,
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        'Email : ',
+                        style: _textStyle,
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        'address : ',
+                        style: _textStyle,
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        'city :',
+                        style: _textStyle,
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        'phone number :  ',
+                        style: _textStyle,
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        ProfilePage.user.fullName,
+                        style: _textStyle,
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        ProfilePage.user.email,
+                        style: _textStyle,
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        ProfilePage.user.address,
+                        style: _textStyle,
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        ProfilePage.user.city,
+                        style: _textStyle,
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        ProfilePage.user.phone,
+                        style: _textStyle,
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                _function();
+                ProfilePage.logedIn = false;
+              },
+              child: const Text('logout'),
+            )
+          ],
+          crossAxisAlignment: CrossAxisAlignment.start,
+        ),
+      ),
+    );
+  }
+}
+
+class LoginPage extends StatefulWidget {
+  const LoginPage({Key? key, required this.onLogedIn}) : super(key: key);
+  final Function onLogedIn;
+
+  @override
+  State<LoginPage> createState() => _LoginPageState(onLogedIn);
+}
+
+class _LoginPageState extends State<LoginPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool firstTime = true;
   bool isAdmin = false;
+
+  Function _function;
+
+  _LoginPageState(this._function);
 
   String? errorHandeler(String text) {
     if (text.isEmpty) {
@@ -24,14 +193,24 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  final snackBarError = SnackBar(
-      content: const Text('password or Email was wrong'),
+  final snackBarError = const SnackBar(
+      content: Text('password or Email was wrong'),
       backgroundColor: Colors.redAccent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
             topRight: Radius.circular(10), topLeft: Radius.circular(10)),
-        side: const BorderSide(
+        side: BorderSide(
           color: Colors.red,
+        ),
+      ));
+  final snackBarSuccess = const SnackBar(
+      content: Text('login success'),
+      backgroundColor: Colors.greenAccent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+            topRight: Radius.circular(10), topLeft: Radius.circular(10)),
+        side: BorderSide(
+          color: Colors.green,
         ),
       ));
 
@@ -117,9 +296,23 @@ class _ProfilePageState extends State<ProfilePage> {
                 // print(decoded['isLogin']);
                 setState(() {
                   firstTime = false;
-                  ScaffoldMessenger.of(context).showSnackBar(snackBarError);
+                  if (emailController.text == 'amir' &&
+                      passwordController.text == '123') {
+                    _function();
+                    ProfilePage.logedIn = true;
+                    ScaffoldMessenger.of(context).showSnackBar(snackBarSuccess);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(snackBarError);
+                  }
                 });
-                ProfilePage.logedIn = !ProfilePage.logedIn;
+                ProfilePage.user = User(
+                    'amirjavani@outlook.com',
+                    'amir mahdi javani',
+                    'tehran',
+                    '09108511227',
+                    '123',
+                    'address');
+
                 print(ProfilePage.logedIn);
               },
               child: const Text(
