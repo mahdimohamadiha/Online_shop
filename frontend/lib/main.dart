@@ -34,13 +34,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  static const List<Widget> _widgetOptions = <Widget>[
-    ShoppingCartPage(),
+  int _selectedIndex;
+  static final List<Widget> _widgetOptions = <Widget>[
+    ShoppingCartPage(goToLoginPage: () {}),
     homePage(),
     ProfilePage(),
   ];
-  int _selectedIndex;
-
   _MyHomePageState(this._selectedIndex) {}
   void _onItemTapped(int index) {
     setState(() {
@@ -100,7 +99,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: SizedBox(
                     height: 550,
                     child: Center(
-                      child: _widgetOptions.elementAt(_selectedIndex),
+                      child: _selectedIndex == 0
+                          ? ShoppingCartPage(goToLoginPage: () {
+                              _onItemTapped(2);
+                            })
+                          : _widgetOptions.elementAt(_selectedIndex),
                       //   child: IndexedStack(
                       // children: _widgetOptions,
                       // index: _selectedIndex,

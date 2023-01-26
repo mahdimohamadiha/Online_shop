@@ -335,7 +335,9 @@ class _LoginPageState extends State<LoginPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) {
-                      return SignUp();
+                      return SignUp(
+                        changeLogedIn: _function,
+                      );
                     },
                   ),
                 );
@@ -366,14 +368,27 @@ class MainButton extends StatelessWidget {
   }
 }
 
-class SignUp extends StatelessWidget {
-  SignUp({Key? key}) : super(key: key);
+class SignUp extends StatefulWidget {
+  SignUp({Key? key, required this.changeLogedIn}) : super(key: key);
+  final Function changeLogedIn;
+  @override
+  State<SignUp> createState() => _SignUpState(this.changeLogedIn);
+}
+
+class _SignUpState extends State<SignUp> {
   TextEditingController usernameController = TextEditingController();
+
   TextEditingController passwordController = TextEditingController();
+
   TextEditingController phoneController = TextEditingController();
+
   TextEditingController addressController = TextEditingController();
+
   TextEditingController fullNameController = TextEditingController();
+
   TextEditingController cityController = TextEditingController();
+  final Function functionChangeLogedIn;
+  _SignUpState(this.functionChangeLogedIn);
 
   @override
   Widget build(BuildContext context) {
@@ -383,114 +398,129 @@ class SignUp extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
-        child: Column(
-          children: <Widget>[
-            Text(
-              'Sign Up',
-              style: TextStyle(fontSize: 50),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: usernameController,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Email',
-                hintText: 'Enter Your Email',
-                contentPadding: EdgeInsets.all(20),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          child: Column(
+            children: <Widget>[
+              Text(
+                'Sign Up',
+                style: TextStyle(fontSize: 50),
               ),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Password ',
-                hintText: 'Enter Password',
-                contentPadding: EdgeInsets.all(20),
+              SizedBox(height: 10),
+              TextField(
+                controller: usernameController,
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.email),
+                  border: OutlineInputBorder(),
+                  labelText: 'Email',
+                  hintText: 'Enter Your Email',
+                  contentPadding: EdgeInsets.all(20),
+                ),
               ),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: addressController,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'ADRRESS',
-                hintText: 'ADRRESS',
-                contentPadding: EdgeInsets.all(20),
+              SizedBox(height: 10),
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.lock_outline),
+                  border: OutlineInputBorder(),
+                  labelText: 'Password ',
+                  hintText: 'Enter Password',
+                  contentPadding: EdgeInsets.all(20),
+                ),
               ),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: fullNameController,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'FULLNAME',
-                hintText: 'FULLNAME',
-                contentPadding: EdgeInsets.all(20),
+              SizedBox(height: 10),
+              TextField(
+                controller: addressController,
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.house),
+                  border: OutlineInputBorder(),
+                  labelText: 'ADRRESS',
+                  hintText: 'enter your address',
+                  contentPadding: EdgeInsets.all(20),
+                ),
               ),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: phoneController,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'PHONE',
-                hintText: 'PHONE',
-                contentPadding: EdgeInsets.all(20),
+              SizedBox(height: 10),
+              TextField(
+                controller: fullNameController,
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.person),
+                  border: OutlineInputBorder(),
+                  labelText: 'FULLNAME',
+                  hintText: 'enter your full name',
+                  contentPadding: EdgeInsets.all(20),
+                ),
               ),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: cityController,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'CITY',
-                hintText: 'City',
-                contentPadding: EdgeInsets.all(20),
+              SizedBox(height: 10),
+              TextField(
+                controller: phoneController,
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.phone_android),
+                  border: OutlineInputBorder(),
+                  labelText: 'PHONE',
+                  hintText: 'enter your phone number',
+                  contentPadding: EdgeInsets.all(20),
+                ),
               ),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                // _futureAlbum =
-                //     createAlbum(usernameController.text) as Future<Album>?;
-                // final Uri url = Uri.parse("http://10.0.2.2:8000/signup");
-                final Uri url = Uri.parse("http://192.168.135.63:8000/signup");
-                final headers = {'Content-Type': 'application/json'};
-                final response = await http.post(url,
-                    headers: headers,
-                    body: json.encode({
-                      "customerFullName": fullNameController.text,
-                      'phone': phoneController.text,
-                      'city': cityController.text,
-                      'address': addressController.text,
-                      'customerEmail': usernameController.text,
-                      "password": passwordController.text
-                    }));
-                var decoded = json.decode(response.body);
-                print(decoded['isExistEmail']);
-              },
-              child: const Text(
-                "Sign up",
-                style: TextStyle(fontSize: 18),
+              SizedBox(height: 10),
+              TextField(
+                controller: cityController,
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.location_city),
+                  border: OutlineInputBorder(),
+                  labelText: 'CITY',
+                  hintText: 'enter your city',
+                  contentPadding: EdgeInsets.all(20),
+                ),
               ),
-              style: ButtonStyle(
-                minimumSize: MaterialStateProperty.all(Size(130, 40)),
-                elevation: MaterialStateProperty.all(0),
-                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.0),
+              ElevatedButton(
+                onPressed: () {
+                  // // _futureAlbum =
+                  // //     createAlbum(usernameController.text) as Future<Album>?;
+                  // // final Uri url = Uri.parse("http://10.0.2.2:8000/signup");
+                  // final Uri url =
+                  //     Uri.parse("http://192.168.135.63:8000/signup");
+                  // final headers = {'Content-Type': 'application/json'};
+                  // final response = await http.post(url,
+                  //     headers: headers,
+                  //     body: json.encode({
+                  //       "customerFullName": fullNameController.text,
+                  //       'phone': phoneController.text,
+                  //       'city': cityController.text,
+                  //       'address': addressController.text,
+                  //       'customerEmail': usernameController.text,
+                  //       "password": passwordController.text
+                  //     }));
+                  // var decoded = json.decode(response.body);
+                  setState(() {
+                    ProfilePage.logedIn = true;
+                    functionChangeLogedIn();
+                  });
+
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  "Sign up",
+                  style: TextStyle(fontSize: 18),
+                ),
+                style: ButtonStyle(
+                  minimumSize: MaterialStateProperty.all(Size(130, 40)),
+                  elevation: MaterialStateProperty.all(0),
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
                   ),
                 ),
               ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('LOGIN'),
-            ),
-          ],
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('LOGIN'),
+              ),
+            ],
+          ),
         ),
       ),
     );
