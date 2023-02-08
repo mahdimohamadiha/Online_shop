@@ -21,11 +21,6 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
 
   _ShoppingCartPageState(this._functiongoToLoginPage);
   List<Product> orders = ProfilePage.user.orders;
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {

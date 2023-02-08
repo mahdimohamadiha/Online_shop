@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:online_shop/product-page.dart';
+import 'package:online_shop/product.dart';
 
 class CustomSearchDelegate extends SearchDelegate {
-  List<String> searchTerms = [];
+  List<Product> searchTerms = [
+    Product.searchList('clash of clans', 1),
+    Product.searchList('fortnite', 2),
+    Product.searchList('call of duty', 3),
+    Product.searchList('god of war', 4),
+  ];
 
   // first overwrite to
   // clear the search text
@@ -31,10 +38,10 @@ class CustomSearchDelegate extends SearchDelegate {
   // third overwrite to show query result
   @override
   Widget buildResults(BuildContext context) {
-    List<String> matchQuery = [];
-    for (var fruit in searchTerms) {
-      if (fruit.toLowerCase().contains(query.toLowerCase())) {
-        matchQuery.add(fruit);
+    List<Product> matchQuery = [];
+    for (var product in searchTerms) {
+      if (product.name.toLowerCase().contains(query.toLowerCase())) {
+        matchQuery.add(product);
       }
     }
     return ListView.builder(
@@ -42,7 +49,17 @@ class CustomSearchDelegate extends SearchDelegate {
       itemBuilder: (context, index) {
         var result = matchQuery[index];
         return ListTile(
-          title: Text(result),
+          title: Text(result.name),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  return ProductPage(product: result);
+                },
+              ),
+            );
+          },
         );
       },
     );
@@ -52,10 +69,10 @@ class CustomSearchDelegate extends SearchDelegate {
   // querying process at the runtime
   @override
   Widget buildSuggestions(BuildContext context) {
-    List<String> matchQuery = [];
-    for (var fruit in searchTerms) {
-      if (fruit.toLowerCase().contains(query.toLowerCase())) {
-        matchQuery.add(fruit);
+    List<Product> matchQuery = [];
+    for (Product product in searchTerms) {
+      if (product.name.toLowerCase().contains(query.toLowerCase())) {
+        matchQuery.add(product);
       }
     }
     return ListView.builder(
@@ -63,9 +80,17 @@ class CustomSearchDelegate extends SearchDelegate {
       itemBuilder: (context, index) {
         var result = matchQuery[index];
         return ListTile(
-          title: Text(result),
+          title: Text(result.name),
           onTap: () {
             print(result);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  return ProductPage(product: result);
+                },
+              ),
+            );
           },
         );
       },
