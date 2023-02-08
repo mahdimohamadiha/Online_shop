@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:online_shop/ProfilePage.dart';
 import 'package:online_shop/home-page.dart';
 import 'package:online_shop/main.dart';
+import 'package:online_shop/product-page.dart';
+import 'package:online_shop/product.dart';
 
 class ShoppingCartPage extends StatefulWidget {
   const ShoppingCartPage({Key? key, required this.goToLoginPage})
@@ -18,16 +20,140 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
   Function _functiongoToLoginPage;
 
   _ShoppingCartPageState(this._functiongoToLoginPage);
+  List<Product> orders = ProfilePage.user.orders;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: ProfilePage.logedIn
-          ? Text('data')
+          ? orders.isEmpty
+              ? const Text('your shopping cart is empty')
+              : Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10.0, left: 10),
+                      child: SizedBox(
+                        height: MediaQuery.of(context).size.height - 200,
+                        child: GridView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          itemCount: orders.length,
+                          scrollDirection: Axis.vertical,
+                          itemBuilder: (context, index) {
+                            var result = orders[index];
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Container(
+                                width: 150,
+                                alignment: Alignment.center,
+                                child: Stack(
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        print(result.name);
+
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) {
+                                              return ProductPage(
+                                                  product: orders[index]);
+                                            },
+                                          ),
+                                        );
+                                      },
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Image.asset(result.imageURL,
+                                              width: 100,
+                                              height: 100,
+                                              fit: BoxFit.contain),
+                                          Text(result.name,
+                                              style: TextStyle(fontSize: 20)),
+                                          Text(result.price.toString()),
+                                        ],
+                                      ),
+                                    ),
+                                    Positioned(
+                                      bottom: 0,
+                                      right: 0,
+                                      child: TextButton(
+                                        style: TextButton.styleFrom(
+                                          minimumSize: Size(1, 1),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                        child: const Icon(
+                                          Icons.delete_outline,
+                                          size: 15,
+                                          color: Colors.black,
+                                        ),
+                                        onPressed: () {
+                                          setState(() {
+                                            orders.removeAt(index);
+                                          });
+                                        },
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                          gridDelegate:
+                              const SliverGridDelegateWithMaxCrossAxisExtent(
+                                  maxCrossAxisExtent: 200,
+                                  childAspectRatio: 1,
+                                  crossAxisSpacing: 20,
+                                  mainAxisSpacing: 20),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                  onPressed: () {
+                                    print('pardakht');
+                                  },
+                                  child: const Text('pay')),
+                              flex: 5,
+                            ),
+                            Expanded(
+                              flex: 3,
+                              child: TextButton.icon(
+                                onPressed: () {
+                                  setState(() {
+                                    ProfilePage.user.orders = [];
+                                    orders = [];
+                                  });
+                                },
+                                icon: const Icon(Icons.delete_outline,
+                                    color: Colors.red),
+                                label: const Text(
+                                  'delete all',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                )
           : Container(
               padding: const EdgeInsets.all(20),
               width: 300,
-              height: 200,
+              height: 300,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
                 color: Colors.grey[300],

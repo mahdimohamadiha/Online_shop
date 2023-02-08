@@ -17,7 +17,7 @@ class CategoriesContainer extends StatelessWidget {
         Expanded(
           flex: 4,
           child: Container(
-            width: 150,
+            width: 80,
             height: 100,
             decoration: const BoxDecoration(
                 color: Colors.grey,
