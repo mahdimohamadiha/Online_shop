@@ -9,7 +9,7 @@ def localTime():
     return localTime
 
 def shippedTime():
-    shippedTime = time.ctime(time.time() + 432,000 )
+    shippedTime = time.ctime(time.time() + 432,000)
     return shippedTime
 
 def create_connection():
@@ -25,59 +25,31 @@ def create_connection():
 
 @app.post("/signup")
 def signup(req: dict):
-    conn = None
-    cur = None
     id = 0
-    try:
-        conn, cur = create_connection()
-        cur.execute('SELECT * FROM "OnlineShop".customers')
-        for record in cur.fetchall():
-            if record[0] is None:
-                id = 0
-            else:
-                id = record[0] + 1
-            if record[5] == req["customerEmail"]:
-                return {"isExistEmail": "True"}
-                
-        # cur = conn.cursor(0)
-                
-        # for record2 in cur.fetchall():
-        #     if record2[5] == req["customerEmail"]:
-        #         return {"isExistEmail": "True"}
-                
-        insert_script = 'INSERT INTO "OnlineShop".customers (customerID, customerFullName, phone, city, address, customerEmail, password) VALUES (%s, %s, %s, %s, %s, %s, %s)'
-        insert_value = (id, req["customerFullName"], req["phone"], req["city"], req["address"], req["customerEmail"], req["password"])
-        cur.execute(insert_script, insert_value)
-        conn.commit()
-    except Exception as erorr:
-        print(erorr)
-    
-    finally:
-        if cur is not None:
-            cur.close()
-        if conn is not None:    
-            conn.close()
+    conn, cur = create_connection()
+    cur.execute('SELECT * FROM "OnlineShop".customers')
+    for record in cur.fetchall():
+        if record[0] is None:
+            id = 0
+        else:
+            id = record[0] + 1
+        if record[5] == req["customerEmail"]:
+            return {"isExistEmail": "True"}
+            
+    insert_script = 'INSERT INTO "OnlineShop".customers (customerID, customerFullName, phone, city, address, customerEmail, password) VALUES (%s, %s, %s, %s, %s, %s, %s)'
+    insert_value = (id ,req["customerFullName"], req["phone"], req["city"], req["address"], req["customerEmail"], req["password"])
+    cur.execute(insert_script, insert_value)
+    conn.commit()
     return {"isExistEmail": "False"}
 
 @app.post('/login')
 def login(req: dict):
-    conn = None
-    cur = None
-    try:
         conn, cur = create_connection()
         cur.execute('SELECT * FROM "OnlineShop".customers')
         for record in cur.fetchall():
             if record[5] == req["customerEmail"] and record[6] == req["password"]:
                 return {"isLogin": "True"}
         return {"isLogin": "False"}
-    except Exception as erorr:
-        print(erorr)
-    
-    finally:
-        if cur is not None:
-            cur.close()
-        if conn is not None:    
-            conn.close()
     
 
 @app.post("/register-product-information")
@@ -128,16 +100,17 @@ def editProductInformation(req: dict):
         print(erorr)
 
 @app.get("/product-search")
-def productSearch(req: dict):
+def productSearch():
     conn = None
     cur = None
-    id = []
+    products = []
     try:
         conn, cur = create_connection()
         cur.execute('SELECT * FROM "OnlineShop".products')
         for record in cur.fetchall():
-            if record[1] == req["productName"]:
-                id.append(record[0])
+            products.append({"productID": record[0],
+                             "productName": record[1]})
+            
     except Exception as erorr:
         print(erorr)
     finally:
@@ -145,7 +118,7 @@ def productSearch(req: dict):
             cur.close()
         if conn is not None:    
             conn.close()    
-    return {"id": id}
+    return products
 
 @app.post("/registration-products-order")
 def registrationProductsOrder(req: dict):
@@ -196,25 +169,33 @@ def customerOrderConfirmation(req: dict):
         if conn is not None:    
             conn.close() 
 
-@app.get("/home")
+@app.get("/sortProductRelease")
 def home():
-    home = []
+    sort_product = []
     conn, cur = create_connection()
     cur.execute('SELECT * FROM "OnlineShop".products')
     for record in cur.fetchall():
-        home.append({"productID": record[0],
+        sort_product.append({"productID": record[0],
                         "productName": record[1],
                         "salePrice": record[4],
                         "image": record[6],
                         "gameReleaseDate": record[7]})
-    home.sort(key=lambda home: home["gameReleaseDate"])    
-    return home
-
-# @app.get('/item/{id}')
-# def read_item(id: int):
-#     return id
+    sort_product.sort(key=lambda sort_product: sort_product["gameReleaseDate"])    
+    return sort_product
 
 
-# def search():
-#     return "saerch"
-# saadsdasadadssads
+@app.get("/getProduct")
+def home(req: dict):
+    product = []
+    conn, cur = create_connection()
+    cur.execute('SELECT * FROM "OnlineShop".products')
+    for record in cur.fetchall():
+        if record[0] == req["productID"]:
+            product = {"productName": record[1],
+                       "productVendor": record[2],
+                       "buyPrice": record[3],
+                       "salePrice": record[4],
+                       "textDescription": record[5],
+                       "image": record[6],
+                       "gameReleaseDate": record[7]}
+    return product
