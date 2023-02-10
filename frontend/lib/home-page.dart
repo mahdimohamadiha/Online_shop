@@ -14,12 +14,12 @@ class homePage extends StatefulWidget {
 }
 
 class _homePageState extends State<homePage> {
-  Product product1 =
-      Product.full('Cod', 'discription', 'asset/image/download.jpg', 150, 0);
-  Product product2 = Product.full('Clash of clans', 'discription',
-      'asset/image/1-2-clash-of-clans-wizard-png.png', 150, 1);
-  Product product3 =
-      Product.full('Cod', 'discription', 'asset/image/download.jpg', 150, 2);
+  // Product product1 =
+  //     Product.full('Cod', 'discription', 'asset/image/download.jpg', '150', 0);
+  // Product product2 = Product.full('Clash of clans', 'discription',
+  //     'asset/image/1-2-clash-of-clans-wizard-png.png', '150', 1);
+  // Product product3 =
+  //     Product.full('Cod', 'discription', 'asset/image/download.jpg', '150', 2);
 
   List<Categories> categories = [];
 
@@ -46,7 +46,7 @@ class _homePageState extends State<homePage> {
   List<Product> products = [];
   Future<void> productsetdata() async {
     products = [];
-    final Uri url = Uri.parse("http://192.168.135.63:8000/home");
+    final Uri url = Uri.parse("http://10.0.2.2:8000/home");
     final headers = {'Content-Type': 'application/json'};
     final response = await http.get(url, headers: headers);
     List<dynamic> decoded = json.decode(response.body);
@@ -67,7 +67,7 @@ class _homePageState extends State<homePage> {
 
   @override
   void initState() {
-    products = [product1, product2, product3];
+    productsetdata();
     categories = [];
     categories.add(action);
     categories.add(strategic);

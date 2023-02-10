@@ -40,7 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
     homePage(),
     ProfilePage(),
   ];
-  _MyHomePageState(this._selectedIndex) {}
+  _MyHomePageState(this._selectedIndex);
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;

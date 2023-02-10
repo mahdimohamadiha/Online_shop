@@ -1,14 +1,52 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:online_shop/product-page.dart';
 import 'package:online_shop/product.dart';
+import 'package:http/http.dart' as http;
 
 class CustomSearchDelegate extends SearchDelegate {
-  List<Product> searchTerms = [
-    Product.searchList('clash of clans', 1),
-    Product.searchList('fortnite', 2),
-    Product.searchList('call of duty', 3),
-    Product.searchList('god of war', 4),
-  ];
+  Uri urlProductList = Uri.parse("http://10.0.2.2:8000/product-search");
+  Uri urlGetProduct = Uri.parse("http://10.0.2.2:8000/getProduct");
+
+  CustomSearchDelegate() {
+    productsetdata();
+  }
+
+  Future<void> productsetdata() async {
+    final headers = {'Content-Type': 'application/json'};
+    final response = await http.get(urlProductList, headers: headers);
+    List<dynamic> decoded = json.decode(response.body);
+    print(decoded);
+    for (int x = 0; x < decoded.length; x++) {
+      Product product = Product.searchList(
+        decoded[x]['productName'],
+        decoded[x]['productID'],
+      );
+      searchTerms.add(product);
+      print(product.name);
+    }
+  }
+
+  late Product product;
+  Future<void> getProduct(int id) async {
+    final headers = {'Content-Type': 'application/json'};
+    final response = await http.post(urlGetProduct,
+        headers: headers, body: json.encode({'productID': id}));
+    var decoded = json.decode(response.body);
+    print(id);
+    product = Product.product(
+        id,
+        decoded['productName'],
+        decoded['productVendor'],
+        decoded['salePrice'],
+        decoded['buyPrice'],
+        decoded['textDescription'],
+        decoded['image'],
+        decoded['gameReleaseDate']);
+  }
+
+  List<Product> searchTerms = [];
 
   // first overwrite to
   // clear the search text
@@ -50,12 +88,13 @@ class CustomSearchDelegate extends SearchDelegate {
         var result = matchQuery[index];
         return ListTile(
           title: Text(result.name),
-          onTap: () {
+          onTap: () async {
+            getProduct(result.ID);
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) {
-                  return ProductPage(product: result);
+                  return ProductPage(product: product);
                 },
               ),
             );
@@ -81,13 +120,13 @@ class CustomSearchDelegate extends SearchDelegate {
         var result = matchQuery[index];
         return ListTile(
           title: Text(result.name),
-          onTap: () {
-            print(result);
+          onTap: () async {
+            await getProduct(result.ID);
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) {
-                  return ProductPage(product: result);
+                  return ProductPage(product: product);
                 },
               ),
             );
