@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:online_shop/Categories.dart';
+import 'package:online_shop/main.dart';
 import 'package:online_shop/product-page.dart';
 import 'package:online_shop/product.dart';
 import 'package:http/http.dart' as http;
@@ -46,7 +47,7 @@ class _homePageState extends State<homePage> {
   List<Product> products = [];
   Future<void> productsetdata() async {
     products = [];
-    final Uri url = Uri.parse("http://10.0.2.2:8000/home");
+    final Uri url = Uri.parse("${MyApp.url}/sortProductRelease");
     final headers = {'Content-Type': 'application/json'};
     final response = await http.get(url, headers: headers);
     List<dynamic> decoded = json.decode(response.body);
@@ -128,8 +129,9 @@ class _homePageState extends State<homePage> {
                                 child: Container(
                                   width: 150,
                                   alignment: Alignment.center,
-                                  color: Colors.grey[(index % 9) * 100],
                                   child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                        minimumSize: Size(150, 1)),
                                     onPressed: () {
                                       print(result.name);
 
@@ -149,11 +151,14 @@ class _homePageState extends State<homePage> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        Image.asset(result.imageURL,
+                                        Image.network(result.imageURL,
                                             width: 100,
                                             height: 100,
                                             fit: BoxFit.contain),
                                         Text(result.name,
+                                            overflow: TextOverflow.fade,
+                                            maxLines: 1,
+                                            softWrap: false,
                                             style: TextStyle(fontSize: 20)),
                                         Text(result.price.toString()),
                                       ],

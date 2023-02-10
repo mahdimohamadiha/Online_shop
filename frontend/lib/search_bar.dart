@@ -1,13 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:online_shop/main.dart';
 import 'package:online_shop/product-page.dart';
 import 'package:online_shop/product.dart';
 import 'package:http/http.dart' as http;
 
 class CustomSearchDelegate extends SearchDelegate {
-  Uri urlProductList = Uri.parse("http://10.0.2.2:8000/product-search");
-  Uri urlGetProduct = Uri.parse("http://10.0.2.2:8000/getProduct");
+  Uri urlProductList = Uri.parse("${MyApp.url}/product-search");
+  Uri urlGetProduct = Uri.parse("${MyApp.url}/getProduct");
 
   CustomSearchDelegate() {
     productsetdata();

@@ -48,6 +48,8 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                                 child: Stack(
                                   children: [
                                     ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                          minimumSize: Size(150, 1)),
                                       onPressed: () {
                                         print(result.name);
 
@@ -65,11 +67,14 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
                                         children: [
-                                          Image.asset(result.imageURL,
+                                          Image.network(result.imageURL,
                                               width: 100,
                                               height: 100,
                                               fit: BoxFit.contain),
                                           Text(result.name,
+                                              overflow: TextOverflow.fade,
+                                              maxLines: 1,
+                                              softWrap: false,
                                               style: TextStyle(fontSize: 20)),
                                           Text(result.price.toString()),
                                         ],

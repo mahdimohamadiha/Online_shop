@@ -59,14 +59,13 @@ class _ProductPageState extends State<ProductPage> {
               slivers: [
                 SliverToBoxAdapter(
                   child: SizedBox(
-                    height: 800,
                     child: Column(
                       children: [
                         Stack(
                           children: [
                             Container(
-                              height: 500,
                               color: Colors.white,
+                              height: 450,
                             ),
                             Container(
                               decoration: BoxDecoration(
@@ -119,7 +118,11 @@ class _ProductPageState extends State<ProductPage> {
                               right: 10,
                               left: 100,
                               child: Container(
-                                child: Image.network(product.imageURL),
+                                child: Image.network(
+                                  product.imageURL,
+                                  height: 300,
+                                  width: 200,
+                                ),
                               ),
                             )
                           ],
@@ -137,45 +140,43 @@ class _ProductPageState extends State<ProductPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: 5,
-                            child: ElevatedButton(
-                              child: Text("add to shopping card"),
-                              onPressed: () {
-                                if (ProfilePage.logedIn) {
-                                  ProfilePage.user.orders.add(product);
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(snackBarSuccess);
-                                } else {
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(snackBarError);
-                                }
-                              },
-                            ),
-                          ),
-                          Expanded(
-                            child: IconButton(
-                              onPressed: () {},
-                              icon: Icon(Icons.doorbell),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Expanded(
-                        child: Text(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 5,
+                          child: ElevatedButton(
+                            child: Text("add to shopping card"),
+                            onPressed: () {
+                              if (ProfilePage.logedIn) {
+                                ProfilePage.user.orders.add(product);
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(snackBarSuccess);
+                              } else {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(snackBarError);
+                              }
+                            },
+                          ),
+                        ),
+                        Expanded(
+                          child: IconButton(
+                            onPressed: () {},
+                            icon: Icon(Icons.doorbell),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                      child: Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text(
                       'price : ${product.price} \$',
                       style: TextStyle(fontSize: 20),
-                    )),
-                  )
+                    ),
+                  ))
                 ],
               ),
             ),

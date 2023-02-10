@@ -14,13 +14,15 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
+  static String url = 'http://10.0.2.2:8000';
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: '',
       theme: ThemeData(useMaterial3: true, primarySwatch: Colors.grey),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: ''),
     );
   }
 }
@@ -53,7 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
         bottomNavigationBar: BottomNavigationBar(
             items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                  label: 'shopping card',
+                  label: 'shopping cart',
                   icon: Icon(Icons.shopping_cart),
                   backgroundColor: Colors.grey[450]),
               BottomNavigationBarItem(
@@ -104,9 +106,6 @@ class _MyHomePageState extends State<MyHomePage> {
                               _onItemTapped(2);
                             })
                           : _widgetOptions.elementAt(_selectedIndex),
-                      //   child: IndexedStack(
-                      // children: _widgetOptions,
-                      // index: _selectedIndex,
                     )),
               ),
             ],
