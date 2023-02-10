@@ -54,30 +54,20 @@ def login(req: dict):
 
 @app.post("/register-product-information")
 def registerProductInformation(req: dict):
-    conn = None
-    cur = None
-    id = 0
-    try:
-        conn, cur = create_connection()
-        cur.execute('SELECT * FROM "OnlineShop".products')
-        for record in cur.fetchall():
-            if record[0] is None:
-                id = 0
-            else:
+    id = 1
+    conn, cur = create_connection()
+    cur.execute('SELECT * FROM "OnlineShop".products')
+    for record in cur.fetchall():
+        if record[0] is None:
+            id = 1
+        else:
+            if record[0] >= id:
                 id = record[0] + 1
-                       
-        insert_script = 'INSERT INTO "OnlineShop".products (productID, productName, productVendor, buyPrice, salePrice, textDescription, image) VALUES (%s, %s, %s, %s, %s, %s, %s)'
-        insert_value = (id, req["productName"], req["productVendor"], req["buyPrice"], req["salePrice"], req["textDescription"], req["image"])
-        cur.execute(insert_script, insert_value)
-        conn.commit()
-    except Exception as erorr:
-        print(erorr)
-    
-    finally:
-        if cur is not None:
-            cur.close()
-        if conn is not None:    
-            conn.close()
+                    
+    insert_script = 'INSERT INTO "OnlineShop".products (productID, productName, productVendor, buyPrice, salePrice, textDescription, image, gameReleaseDate) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'
+    insert_value = (id, req["productName"], req["productVendor"], req["buyPrice"], req["salePrice"], req["textDescription"], req["image"], req["gameReleaseDate"])
+    cur.execute(insert_script, insert_value)
+    conn.commit()
     return {"registerProductInformation": "True"}
 
 @app.patch("/edit-product-information")
@@ -123,7 +113,6 @@ def productSearch():
 @app.post("/registration-products-order")
 def registrationProductsOrder(req: dict):
     id = 1
-    
     conn, cur = create_connection()
     cur.execute('SELECT * FROM "OnlineShop".orders')
     for record in cur.fetchall():
@@ -167,8 +156,8 @@ def customerOrderConfirmation(req: dict):
         if conn is not None:    
             conn.close() 
 
-@app.get("/sortProductRelease")
-def home():
+@app.get("/sort-product-release")
+def sortProductRelease():
     sort_product = []
     conn, cur = create_connection()
     cur.execute('SELECT * FROM "OnlineShop".products')
@@ -229,3 +218,11 @@ def deleteOrder(req: dict):
     conn.commit()
     return {"isDelete": "true"}
 
+@app.post('/login-expert')
+def loginExpert(req: dict):
+        conn, cur = create_connection()
+        cur.execute('SELECT * FROM "OnlineShop".experts')
+        for record in cur.fetchall():
+            if record[4] == req["employeeNeme"] and record[5] == req["employeePass"]:
+                return {"expertID": record[0]}
+        return {"isLoginExpert": "False"}
