@@ -25,12 +25,12 @@ def create_connection():
 
 @app.post("/signup")
 def signup(req: dict):
-    id = 0
+    id = 1
     conn, cur = create_connection()
     cur.execute('SELECT * FROM "OnlineShop".customers')
     for record in cur.fetchall():
         if record[0] is None:
-            id = 0
+            id = 1
         else:
             id = record[0] + 1
         if record[5] == req["customerEmail"]:
@@ -48,7 +48,7 @@ def login(req: dict):
         cur.execute('SELECT * FROM "OnlineShop".customers')
         for record in cur.fetchall():
             if record[5] == req["customerEmail"] and record[6] == req["password"]:
-                return {"isLogin": "True"}
+                return {"customerID": record[0]}
         return {"isLogin": "False"}
     
 
@@ -122,27 +122,25 @@ def productSearch():
 
 @app.post("/registration-products-order")
 def registrationProductsOrder(req: dict):
-    conn = None
-    cur = None
-    try:
-        conn, cur = create_connection()
-        cur.execute('SELECT * FROM "OnlineShop".orders')
-        for record in cur.fetchall():
-            if record[0] is None:
-                id = 0
-            else:
-                id = record[0] + 1
-        insert_script = 'INSERT INTO "OnlineShop".orders (orderID, confirmationDate, requiredDate, shippedDate, status, comments, customerID) VALUES (%s, %s, %s, %s, %s, %s, %s)'
-        insert_value = (id, None, localTime(), None, "ثبت سفارش", None, req["customerID"])
-        cur.execute(insert_script, insert_value)
-        conn.commit()
-    except Exception as erorr:
-        print(erorr)
-    finally:
-        if cur is not None:
-            cur.close()
-        if conn is not None:    
-            conn.close()    
+    id = 1
+    
+    conn, cur = create_connection()
+    cur.execute('SELECT * FROM "OnlineShop".orders')
+    for record in cur.fetchall():
+        if record[0] is None:
+            id = 1
+        else:
+            id = record[0] + 1
+            
+    insert_script = 'INSERT INTO "OnlineShop".orders (orderID, confirmationDate, requiredDate, shippedDate, status, comments, customerID) VALUES (%s,%s,%s,%s,%s,%s,%s)'
+    insert_value = (id, None, localTime(), None, "ثبت سفارش", None, req["customerID"])
+    cur.execute(insert_script, insert_value)
+    conn.commit()
+    cur.execute('SELECT * FROM "OnlineShop".products')
+    insert_script = 'UPDATE "OnlineShop".products SET orderID = %s where productid = %s '    
+    update_value = (id, req["productID"])
+    cur.execute(insert_script, update_value)
+    conn.commit()
     return {"isRegistrationProductsOrder": "True"}
 
 @app.patch("/customer-order-confirmation")
@@ -185,6 +183,22 @@ def home():
 
 
 @app.get("/getProduct")
+def home(req: dict):
+    product = []
+    conn, cur = create_connection()
+    cur.execute('SELECT * FROM "OnlineShop".products')
+    for record in cur.fetchall():
+        if record[0] == req["productID"]:
+            product = {"productName": record[1],
+                       "productVendor": record[2],
+                       "buyPrice": record[3],
+                       "salePrice": record[4],
+                       "textDescription": record[5],
+                       "image": record[6],
+                       "gameReleaseDate": record[7]}
+    return product
+
+@app.post("/getProduct")
 def home(req: dict):
     product = []
     conn, cur = create_connection()
