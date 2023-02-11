@@ -34,13 +34,13 @@ def signup(req: dict):
         else:
             id = record[0] + 1
         if record[5] == req["customerEmail"]:
-            return {"isExistEmail": "True"}
+            return {"isExistEmail": True}
             
-    insert_script = 'INSERT INTO "OnlineShop".customers (customerID, customerFullName, phone, city, address, customerEmail, password) VALUES (%s, %s, %s, %s, %s, %s, %s)'
-    insert_value = (id ,req["customerFullName"], req["phone"], req["city"], req["address"], req["customerEmail"], req["password"])
+    insert_script = 'INSERT INTO "OnlineShop".customers (customerID, customerFullName, phone, city, address, customerEmail, password, expertID) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'
+    insert_value = (id ,req["customerFullName"], req["phone"], req["city"], req["address"], req["customerEmail"], req["password"], 1)
     cur.execute(insert_script, insert_value)
     conn.commit()
-    return {"isExistEmail": "False"}
+    return {"isExistEmail": False}
 
 @app.post('/login')
 def login(req: dict):
@@ -49,7 +49,7 @@ def login(req: dict):
         for record in cur.fetchall():
             if record[5] == req["customerEmail"] and record[6] == req["password"]:
                 return {"customerID": record[0]}
-        return {"isLogin": "False"}
+        return {"customerID": 0}
     
 
 @app.post("/register-product-information")
@@ -68,26 +68,21 @@ def registerProductInformation(req: dict):
     insert_value = (id, req["productName"], req["productVendor"], req["buyPrice"], req["salePrice"], req["textDescription"], req["image"], req["gameReleaseDate"])
     cur.execute(insert_script, insert_value)
     conn.commit()
-    return {"registerProductInformation": "True"}
+    return {"registerProductInformation": True}
 
 @app.patch("/edit-product-information")
 def editProductInformation(req: dict):
-    conn = None
-    cur = None
-    try:
-        conn, cur = create_connection()
-        cur.execute('SELECT * FROM "OnlineShop".products')
-        for record in cur.fetchall():
-            if record[0] == req["productID"]:
-                update_script = 'UPDATE "OnlineShop".products SET productName = %s, productVendor = %s, buyPrice = %s, salePrice = %s, textDescription = %s, image = %s'
-                update_value = (req["productName"], req["productVendor"], req["buyPrice"], req["salePrice"], req["textDescription"], req["image"])
-                cur.execute(update_script, update_value)
-                conn.commit()
-                return {"wrongID": "False"}
-            else:
-                return {"wrongID": "True"}
-    except Exception as erorr:
-        print(erorr)
+    conn, cur = create_connection()
+    cur.execute('SELECT * FROM "OnlineShop".products')
+    for record in cur.fetchall():
+        if record[0] == req["productID"]:
+            update_script = 'UPDATE "OnlineShop".products SET productName = %s, productVendor = %s, buyPrice = %s, salePrice = %s, textDescription = %s, image = %s, gameReleaseDate = %s'
+            update_value = (req["productName"], req["productVendor"], req["buyPrice"], req["salePrice"], req["textDescription"], req["image"], req["gameReleaseDate"])
+            cur.execute(update_script, update_value)
+            conn.commit()
+            return {"wrongID": False}
+        else:
+            return {"wrongID": True}
 
 @app.get("/product-search")
 def productSearch():
@@ -130,7 +125,7 @@ def registrationProductsOrder(req: dict):
     update_value = (id, req["productID"])
     cur.execute(insert_script, update_value)
     conn.commit()
-    return {"isRegistrationProductsOrder": "True"}
+    return {"isRegistrationProductsOrder": True}
 
 @app.patch("/customer-order-confirmation")
 def customerOrderConfirmation(req: dict):
@@ -216,13 +211,42 @@ def deleteOrder(req: dict):
     delete_value = (str(req["orderID"]))
     cur.execute(delete_script, delete_value)
     conn.commit()
-    return {"isDelete": "true"}
+    return {"isDelete": True}
 
 @app.post('/login-expert')
 def loginExpert(req: dict):
-        conn, cur = create_connection()
-        cur.execute('SELECT * FROM "OnlineShop".experts')
-        for record in cur.fetchall():
-            if record[4] == req["employeeNeme"] and record[5] == req["employeePass"]:
-                return {"expertID": record[0]}
-        return {"isLoginExpert": "False"}
+    conn, cur = create_connection()
+    cur.execute('SELECT * FROM "OnlineShop".experts')
+    for record in cur.fetchall():
+        if record[4] == req["employeeNeme"] and record[5] == req["employeePass"]:
+            return {"expertID": record[0]}
+    return {"expertID": 0}
+    
+@app.post('/get-customer')
+def getCustomer(req: dict):
+    conn, cur = create_connection()
+    cur.execute('SELECT * FROM "OnlineShop".customers')
+    for record in cur.fetchall():
+        if record[0] == req["customerID"]:
+            customer = {"customerFullName": record[1],
+                       "phone": record[2],
+                       "city": record[3],
+                       "address": record[4],
+                       "customerEmail": record[5],
+                       "password": record[6],
+                       "expertID": record[7]}
+    return customer
+
+@app.post('/get-expert')
+def getExpert(req: dict):
+    conn, cur = create_connection()
+    cur.execute('SELECT * FROM "OnlineShop".experts')
+    for record in cur.fetchall():
+        if record[0] == req["expertID"]:
+            expert = {"expertFullName": record[1],
+                       "expertEmail": record[2],
+                       "jobTitle": record[3],
+                       "employeeNeme": record[4],
+                       "employeePass": record[5]}
+    return expert
+
