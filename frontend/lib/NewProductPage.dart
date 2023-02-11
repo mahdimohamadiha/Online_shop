@@ -300,6 +300,9 @@ class _NewProductPageState extends State<NewProductPage> {
                         imageUrlCon.text = '';
                         gameReleaseDateCon.text = '';
                         categoryCon.text = '';
+                        setState(() {
+                          _categorie = Categories.full('', '', 0);
+                        });
                       },
                       child: Text(
                         'clear',

@@ -6,6 +6,7 @@ import 'package:online_shop/main.dart';
 import 'package:online_shop/product-page.dart';
 import 'package:online_shop/product.dart';
 import 'package:http/http.dart' as http;
+import 'package:cached_network_image/cached_network_image.dart';
 
 class homePage extends StatefulWidget {
   homePage({Key? key}) : super(key: key);
@@ -43,19 +44,19 @@ class _homePageState extends State<homePage> {
   List<Product> products = [];
   Future<void> productsetdata() async {
     products = [];
-    final Uri url = Uri.parse("${MyApp.url}/sort-product-release");
+    final Uri url = Uri.parse("${MyApp.url}/get-sort-product-release");
     final headers = {'Content-Type': 'application/json'};
     final response = await http.get(url, headers: headers);
     List<dynamic> decoded = json.decode(response.body);
-
     setState(() {
       for (int x = 0; x < decoded.length; x++) {
         Product product = Product.full(
             decoded[x]['productName'],
-            '',
             decoded[x]['image'],
             decoded[x]['salePrice'],
-            decoded[x]['productID']);
+            decoded[x]['productID'],
+            decoded[x]['category'],
+            decoded[x]['gameReleaseDate']);
         products.add(product);
         print(product.name);
       }
@@ -115,7 +116,7 @@ class _homePageState extends State<homePage> {
                           )
                         : ListView.builder(
                             physics: const AlwaysScrollableScrollPhysics(),
-                            itemCount: 3,
+                            itemCount: products.length,
                             scrollDirection: Axis.horizontal,
                             itemBuilder: (context, index) {
                               var result = products[index];
@@ -146,6 +147,11 @@ class _homePageState extends State<homePage> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
+                                        // CachedNetworkImage(
+                                        //     imageUrl: result.imageURL,
+                                        //     width: 100,
+                                        //     height: 100,
+                                        //     fit: BoxFit.contain),
                                         Image.network(result.imageURL,
                                             width: 100,
                                             height: 100,
@@ -168,17 +174,6 @@ class _homePageState extends State<homePage> {
               ),
             ),
           ),
-          // SliverPadding(
-          //   padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
-          //   sliver: SliverGrid(
-          //     delegate: SliverChildBuilderDelegate((context, index) {
-          //       var cat = categories[index];
-          //       return CategoriesContainer(category: cat);
-          //     }, childCount: categories.length),
-          //     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          //         crossAxisCount: 4, mainAxisSpacing: 30, crossAxisSpacing: 30),
-          //   ),
-          // ),
           SliverToBoxAdapter(
             child: SizedBox(
               height: 100,
@@ -196,7 +191,48 @@ class _homePageState extends State<homePage> {
                 },
               ),
             ),
-          )
+          ),
+          SliverList(
+              delegate: SliverChildListDelegate(
+                  List.generate(products.length, (index) {
+            return Padding(
+              padding: const EdgeInsets.all(10),
+              child: Container(
+                child: ElevatedButton(
+                  onPressed: () {},
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Image.network(
+                          products[index].imageURL,
+                          width: 100,
+                          height: 100,
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            products[index].name,
+                            style: TextStyle(fontSize: 20),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            'price : ${products[index].price.toString()} \$',
+                            style: TextStyle(fontSize: 15),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          })))
         ],
       ),
     );

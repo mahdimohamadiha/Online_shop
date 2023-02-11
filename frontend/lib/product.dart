@@ -27,10 +27,11 @@ class Product {
 
   Product.full(
     this.name,
-    this.discription,
     this.imageURL,
     this.price,
     this.ID,
+    this.categoryCode,
+    this.gameReleaseDate,
   );
   Product.searchList(
     this.name,
