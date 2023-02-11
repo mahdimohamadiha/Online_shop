@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:online_shop/ProfilePage.dart';
@@ -5,6 +7,7 @@ import 'package:online_shop/home-page.dart';
 import 'package:online_shop/main.dart';
 import 'package:online_shop/product-page.dart';
 import 'package:online_shop/product.dart';
+import 'package:http/http.dart' as http;
 
 class ShoppingCartPage extends StatefulWidget {
   const ShoppingCartPage({Key? key, required this.goToLoginPage})
@@ -19,8 +22,34 @@ class ShoppingCartPage extends StatefulWidget {
 class _ShoppingCartPageState extends State<ShoppingCartPage> {
   Function _functiongoToLoginPage;
 
-  _ShoppingCartPageState(this._functiongoToLoginPage);
-  List<Product> orders = ProfilePage.user.orders;
+  _ShoppingCartPageState(this._functiongoToLoginPage) {
+    getOrdersAPI();
+  }
+  Future<void> getOrdersAPI() async {
+    final Uri url = Uri.parse("${MyApp.url}/login");
+    final headers = {'Content-Type': 'application/json'};
+    final response = await http.post(url,
+        headers: headers,
+        body: json.encode({
+          "customerID": ProfilePage.user.id,
+        }));
+    List<dynamic> decoded = json.decode(response.body);
+    for (int i = 0; i < decoded.length; i++) {
+      Product product = Product.productAsOrder(
+          decoded[i]['productID'],
+          decoded[i]['productName'],
+          decoded[i]['productVendor'],
+          decoded[i]['salePrice'],
+          decoded[i]['buyPrice'],
+          decoded[i]['textDescription'],
+          decoded[i]['image'],
+          decoded[i]['gameReleaseDate'],
+          decoded[i]['orderID']);
+      orders.add(product);
+    }
+  }
+
+  List<Product> orders = [];
 
   @override
   Widget build(BuildContext context) {

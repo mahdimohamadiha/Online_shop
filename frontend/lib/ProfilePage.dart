@@ -14,7 +14,7 @@ class ProfilePage extends StatefulWidget {
   static bool logedIn = false;
   static bool isAdmin = false;
   static User user =
-      User('email', 'fullName', 'city', 'phone', 'password', 'address');
+      User(0, 'email', 'fullName', 'city', 'phone', 'password', 'address');
 }
 
 class _ProfilePageState extends State<ProfilePage> {
@@ -52,13 +52,15 @@ class AdminProfile extends StatefulWidget {
 class _AdminProfileState extends State<AdminProfile> {
   Function _function;
   _AdminProfileState(this._function);
-
+  TextStyle _textStyle = TextStyle(fontSize: 20);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[300],
       body: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               margin: EdgeInsets.symmetric(horizontal: 60, vertical: 20),
@@ -69,6 +71,65 @@ class _AdminProfileState extends State<AdminProfile> {
                   width: 120,
                   height: 120,
                 ),
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'full name :',
+                        style: _textStyle,
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        'Email : ',
+                        style: _textStyle,
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        'employee Name :  ',
+                        style: _textStyle,
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        ProfilePage.user.fullName,
+                        style: _textStyle,
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        ProfilePage.user.email,
+                        style: _textStyle,
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        ProfilePage.user.employeeName,
+                        style: _textStyle,
+                      ),
+                    ],
+                  )
+                ],
               ),
             ),
             Padding(
@@ -367,43 +428,84 @@ class _LoginPageState extends State<LoginPage> {
             ),
             ElevatedButton(
               onPressed: () async {
-                final Uri url = Uri.parse("${MyApp.url}/login");
-                final headers = {'Content-Type': 'application/json'};
-                final response = await http.post(url,
-                    headers: headers,
-                    body: json.encode({
-                      "customerEmail": emailController.text,
-                      "password": passwordController.text
-                    }));
-                var decoded = json.decode(response.body);
-                print(decoded['isLogin']);
+                var decoded;
                 empty();
-                setState(() {
-                  firstTime = false;
-                  if (decoded['isLogin'] && !isEmpty) {
-                    _function();
-                    ProfilePage.logedIn = true;
+                if (!isAdmin) {
+                  final Uri url = Uri.parse("${MyApp.url}/login");
+                  final headers = {'Content-Type': 'application/json'};
+                  final response = await http.post(url,
+                      headers: headers,
+                      body: json.encode({
+                        "customerEmail": emailController.text,
+                        "password": passwordController.text
+                      }));
+                  decoded = json.decode(response.body);
+                  int userID;
+                  print(decoded['customerID']);
+                  if (decoded['customerID'] > 0 && !isEmpty) {
+                    userID = decoded['customerID'];
+
                     ScaffoldMessenger.of(context).showSnackBar(snackBarSuccess);
-                  } else if (emailController.text == 'amir' &&
-                      passwordController.text == '12' &&
-                      isAdmin) {
-                    ProfilePage.isAdmin = true;
-                    _function();
+                    final Uri url = Uri.parse("${MyApp.url}/get-customer");
+                    final headers = {'Content-Type': 'application/json'};
+                    final response = await http.post(url,
+                        headers: headers,
+                        body: json.encode({
+                          "customerID": userID,
+                        }));
+                    decoded = json.decode(response.body);
+                    ProfilePage.user = User(
+                        userID,
+                        decoded['customerEmail'],
+                        decoded['customerFullName'],
+                        decoded['city'],
+                        decoded['phone'],
+                        decoded['password'],
+                        decoded['address']);
                     ProfilePage.logedIn = true;
-                    ScaffoldMessenger.of(context).showSnackBar(snackBarSuccess);
+                    _function();
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(snackBarError);
                   }
-                });
-                ProfilePage.user = User(
-                    'amirjavani@outlook.com',
-                    'amir mahdi javani',
-                    'tehran',
-                    '09108511227',
-                    '123',
-                    'address');
+                } else {
+                  final Uri url = Uri.parse("${MyApp.url}/login-expert");
+                  final headers = {'Content-Type': 'application/json'};
+                  final response = await http.post(url,
+                      headers: headers,
+                      body: json.encode({
+                        "employeeNeme": emailController.text,
+                        "employeePass": passwordController.text
+                      }));
+                  decoded = json.decode(response.body);
+                  int expertId;
+                  print(decoded);
+                  if (decoded['expertID'] > 0 && !isEmpty) {
+                    expertId = decoded['expertID'];
+                    ScaffoldMessenger.of(context).showSnackBar(snackBarSuccess);
+                    final Uri url = Uri.parse("${MyApp.url}/get-expert");
+                    final headers = {'Content-Type': 'application/json'};
+                    final response = await http.post(url,
+                        headers: headers,
+                        body: json.encode({
+                          "expertID": expertId,
+                        }));
+                    decoded = json.decode(response.body);
+                    ProfilePage.user = User.Expert(
+                      decoded['expertEmail'],
+                      decoded['expertFullName'],
+                      decoded['employeePass'],
+                      decoded['employeeNeme'],
+                      decoded['jobTitle'],
+                    );
 
-                print(ProfilePage.logedIn);
+                    ProfilePage.isAdmin = true;
+                    _function();
+                    ProfilePage.logedIn = true;
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(snackBarError);
+                  }
+                }
+                firstTime = false;
               },
               child: const Text(
                 "login",
@@ -644,17 +746,16 @@ class _SignUpState extends State<SignUp> {
                   setState(() {
                     firstTime = false;
                     if (!decoded["isExistEmail"] && !isEmpty) {
-                      ProfilePage.logedIn = true;
-                      functionChangeLogedIn();
                       ScaffoldMessenger.of(context)
                           .showSnackBar(snackBarSuccess);
-                      ProfilePage.user = User(
-                          usernameController.text,
-                          fullNameController.text,
-                          cityController.text,
-                          phoneController.text,
-                          passwordController.text,
-                          addressController.text);
+                      // ProfilePage.user = User(
+                      //     1,
+                      //     usernameController.text,
+                      //     fullNameController.text,
+                      //     cityController.text,
+                      //     phoneController.text,
+                      //     passwordController.text,
+                      //     addressController.text);
                       Navigator.pop(context);
                     } else if (!isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(snackBarError);

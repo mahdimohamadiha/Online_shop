@@ -9,10 +9,38 @@ class Product {
   late String discription;
   late String imageURL;
   late String gameReleaseDate;
+  late int orderID;
 
-  Product.product(this.ID, this.name, this.vendor, this.price, this.buyPrice,
-      this.discription, this.imageURL, this.gameReleaseDate);
+  Product.product(
+    this.ID,
+    this.name,
+    this.vendor,
+    this.price,
+    this.buyPrice,
+    this.discription,
+    this.imageURL,
+    this.gameReleaseDate,
+  );
+  Product.productAsOrder(
+      this.ID,
+      this.name,
+      this.vendor,
+      this.price,
+      this.buyPrice,
+      this.discription,
+      this.imageURL,
+      this.gameReleaseDate,
+      this.orderID);
 
-  Product.full(this.name, this.discription, this.imageURL, this.price, this.ID);
-  Product.searchList(this.name, this.ID);
+  Product.full(
+    this.name,
+    this.discription,
+    this.imageURL,
+    this.price,
+    this.ID,
+  );
+  Product.searchList(
+    this.name,
+    this.ID,
+  );
 }

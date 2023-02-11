@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:online_shop/Categories.dart';
 import 'package:online_shop/main.dart';
@@ -47,7 +47,7 @@ class _homePageState extends State<homePage> {
   List<Product> products = [];
   Future<void> productsetdata() async {
     products = [];
-    final Uri url = Uri.parse("${MyApp.url}/sortProductRelease");
+    final Uri url = Uri.parse("${MyApp.url}/sort-product-release");
     final headers = {'Content-Type': 'application/json'};
     final response = await http.get(url, headers: headers);
     List<dynamic> decoded = json.decode(response.body);
@@ -117,10 +117,16 @@ class _homePageState extends State<homePage> {
                     // Horizontal ListView
                     height: 200,
                     child: products.isEmpty
-                        ? const Text('error')
+                        ? Center(
+                            child: LoadingAnimationWidget.twistingDots(
+                              leftDotColor: Colors.black,
+                              rightDotColor: Colors.grey,
+                              size: 50,
+                            ),
+                          )
                         : ListView.builder(
                             physics: const AlwaysScrollableScrollPhysics(),
-                            itemCount: products.length,
+                            itemCount: 4,
                             scrollDirection: Axis.horizontal,
                             itemBuilder: (context, index) {
                               var result = products[index];
