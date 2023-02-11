@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:online_shop/ProfilePage.dart';
 import 'package:online_shop/product.dart';
 
+import 'NewProductPage.dart';
+
 class ProductPage extends StatefulWidget {
   final Product product;
   const ProductPage({Key? key, required this.product}) : super(key: key);
@@ -146,19 +148,36 @@ class _ProductPageState extends State<ProductPage> {
                       children: [
                         Expanded(
                           flex: 5,
-                          child: ElevatedButton(
-                            child: Text("add to shopping card"),
-                            onPressed: () {
-                              if (ProfilePage.logedIn) {
-                                ProfilePage.user.orders.add(product);
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(snackBarSuccess);
-                              } else {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(snackBarError);
-                              }
-                            },
-                          ),
+                          child: ProfilePage.isAdmin
+                              ? ElevatedButton(
+                                  child: Text("edit"),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) {
+                                          return NewProductPage(
+                                            product: product,
+                                            isEdit: true,
+                                          );
+                                        },
+                                      ),
+                                    );
+                                  },
+                                )
+                              : ElevatedButton(
+                                  child: Text("add to shopping card"),
+                                  onPressed: () {
+                                    if (ProfilePage.logedIn) {
+                                      ProfilePage.user.orders.add(product);
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(snackBarSuccess);
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(snackBarError);
+                                    }
+                                  },
+                                ),
                         ),
                         Expanded(
                           child: IconButton(

@@ -34,13 +34,6 @@ class homePage extends StatefulWidget {
 }
 
 class _homePageState extends State<homePage> {
-  // Product product1 =
-  //     Product.full('Cod', 'discription', 'asset/image/download.jpg', '150', 0);
-  // Product product2 = Product.full('Clash of clans', 'discription',
-  //     'asset/image/1-2-clash-of-clans-wizard-png.png', '150', 1);
-  // Product product3 =
-  //     Product.full('Cod', 'discription', 'asset/image/download.jpg', '150', 2);
-
   List<Product> products = [];
   Future<void> productsetdata() async {
     products = [];
@@ -128,16 +121,38 @@ class _homePageState extends State<homePage> {
                                   child: ElevatedButton(
                                     style: ElevatedButton.styleFrom(
                                         minimumSize: Size(150, 1)),
-                                    onPressed: () {
+                                    onPressed: () async {
                                       print(result.name);
+                                      final headers = {
+                                        'Content-Type': 'application/json'
+                                      };
+                                      Uri urlGetProduct =
+                                          Uri.parse("${MyApp.url}/get-product");
+                                      final response = await http.post(
+                                          urlGetProduct,
+                                          headers: headers,
+                                          body: json.encode(
+                                              {'productID': result.ID}));
+                                      var decoded = json.decode(response.body);
+                                      print(decoded);
+                                      Product _product = Product.product(
+                                        result.ID,
+                                        decoded['productName'],
+                                        decoded['productVendor'],
+                                        decoded['salePrice'],
+                                        decoded['buyPrice'],
+                                        decoded['textDescription'],
+                                        decoded['image'],
+                                        decoded['gameReleaseDate'],
+                                        decoded['category'],
+                                      );
 
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) {
                                             return ProductPage(
-                                              product:
-                                                  products.elementAt(index),
+                                              product: _product,
                                             );
                                           },
                                         ),

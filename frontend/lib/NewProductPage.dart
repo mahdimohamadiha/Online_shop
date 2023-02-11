@@ -9,20 +9,20 @@ import 'package:online_shop/home-page.dart';
 import 'package:online_shop/product.dart';
 import 'package:online_shop/user.dart';
 
+import 'main.dart';
+
 enum category { action, strategic, survival, sport, shooter }
 
 class NewProductPage extends StatefulWidget {
-  const NewProductPage({Key? key}) : super(key: key);
-
-  @override
-  State<NewProductPage> createState() => _NewProductPageState.addNew();
-}
-
-class EditProductPage extends StatefulWidget {
-  const EditProductPage({Key? key, required this.product}) : super(key: key);
+  const NewProductPage({Key? key, required this.product, required this.isEdit})
+      : super(key: key);
   final Product product;
+  final bool isEdit;
   @override
-  State<NewProductPage> createState() => _NewProductPageState.edit(product);
+  // ignore: no_logic_in_create_state
+  State<NewProductPage> createState() => isEdit
+      ? _NewProductPageState.edit(product)
+      : _NewProductPageState.addNew();
 }
 
 class _NewProductPageState extends State<NewProductPage> {
@@ -67,6 +67,44 @@ class _NewProductPageState extends State<NewProductPage> {
 
   late Product product;
   List<String> cats = [];
+
+  bool isEmpty = true;
+
+  void empty() {
+    if (nameCon.text.isNotEmpty &&
+        vendorCon.text.isNotEmpty &&
+        buyPriceCon.text.isNotEmpty &&
+        sellPriceCon.text.isNotEmpty &&
+        descriptionCon.text.isNotEmpty &&
+        imageUrlCon.text.isNotEmpty &&
+        categoryCon.text.isNotEmpty &&
+        gameReleaseDateCon.text.isNotEmpty) {
+      isEmpty = false;
+    } else {
+      isEmpty = true;
+    }
+  }
+
+  final snackBarError = const SnackBar(
+      content: Text('can not use this email'),
+      backgroundColor: Colors.redAccent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+            topRight: Radius.circular(10), topLeft: Radius.circular(10)),
+        side: BorderSide(
+          color: Colors.red,
+        ),
+      ));
+  final snackBarSuccess = const SnackBar(
+      content: Text('sign up success'),
+      backgroundColor: Colors.greenAccent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+            topRight: Radius.circular(10), topLeft: Radius.circular(10)),
+        side: BorderSide(
+          color: Colors.green,
+        ),
+      ));
 
   @override
   Widget build(BuildContext context) {
@@ -281,7 +319,39 @@ class _NewProductPageState extends State<NewProductPage> {
                   Expanded(
                     child: isEdit
                         ? ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () async {
+                              empty();
+
+                              if (isEmpty) {
+                                final Uri url = Uri.parse(
+                                    "${MyApp.url}/edit-product-information");
+                                final headers = {
+                                  'Content-Type': 'application/json'
+                                };
+                                final response = await http.post(url,
+                                    headers: headers,
+                                    body: json.encode({
+                                      "productID": product.ID,
+                                      "productName": nameCon.text,
+                                      "productVendor": vendorCon.text,
+                                      "buyPrice": int.parse(buyPriceCon.text),
+                                      "salePrice": int.parse(sellPriceCon.text),
+                                      "textDescription": descriptionCon.text,
+                                      "image": imageUrlCon.text,
+                                      "gameReleaseDate":
+                                          gameReleaseDateCon.text,
+                                      "category": _categorie.code
+                                    }));
+                                var decoded = json.decode(response.body);
+
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(snackBarSuccess);
+                                Navigator.pop(context);
+                              } else if (!isEmpty) {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(snackBarError);
+                              }
+                            },
                             child: const Text('submit edit'),
                           )
                         : ElevatedButton(

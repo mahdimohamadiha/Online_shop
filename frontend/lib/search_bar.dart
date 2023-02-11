@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 
 class CustomSearchDelegate extends SearchDelegate {
   Uri urlProductList = Uri.parse("${MyApp.url}/product-search");
-  Uri urlGetProduct = Uri.parse("${MyApp.url}/getProduct");
+  Uri urlGetProduct = Uri.parse("${MyApp.url}/get-product");
 
   CustomSearchDelegate() {
     productsetdata();
@@ -45,7 +45,7 @@ class CustomSearchDelegate extends SearchDelegate {
       decoded['textDescription'],
       decoded['image'],
       decoded['gameReleaseDate'],
-      decoded['gameReleaseDate'],
+      decoded['category'],
     );
   }
 

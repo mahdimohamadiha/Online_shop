@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:online_shop/NewProductPage.dart';
 import 'package:online_shop/main.dart';
+import 'package:online_shop/product.dart';
 import 'package:online_shop/user.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -151,7 +152,10 @@ class _AdminProfileState extends State<AdminProfile> {
                     context,
                     MaterialPageRoute(
                       builder: (context) {
-                        return NewProductPage();
+                        return NewProductPage(
+                          product: Product.searchList('name', 1),
+                          isEdit: false,
+                        );
                       },
                     ),
                   );
@@ -748,14 +752,6 @@ class _SignUpState extends State<SignUp> {
                     if (!decoded["isExistEmail"] && !isEmpty) {
                       ScaffoldMessenger.of(context)
                           .showSnackBar(snackBarSuccess);
-                      // ProfilePage.user = User(
-                      //     1,
-                      //     usernameController.text,
-                      //     fullNameController.text,
-                      //     cityController.text,
-                      //     phoneController.text,
-                      //     passwordController.text,
-                      //     addressController.text);
                       Navigator.pop(context);
                     } else if (!isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(snackBarError);
