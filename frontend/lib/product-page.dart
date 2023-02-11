@@ -159,6 +159,11 @@ class _ProductPageState extends State<ProductPage> {
                                           return NewProductPage(
                                             product: product,
                                             isEdit: true,
+                                            function: () {
+                                              setState(() {
+                                                Navigator.pop(context);
+                                              });
+                                            },
                                           );
                                         },
                                       ),

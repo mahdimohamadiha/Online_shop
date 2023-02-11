@@ -73,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
             currentIndex: _selectedIndex,
             showSelectedLabels: true,
             selectedItemColor: Colors.black,
-            backgroundColor: Colors.grey,
+            backgroundColor: Colors.grey[400],
             iconSize: 30,
             onTap: _onItemTapped,
             elevation: 5),

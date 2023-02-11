@@ -155,6 +155,7 @@ class _AdminProfileState extends State<AdminProfile> {
                         return NewProductPage(
                           product: Product.searchList('name', 1),
                           isEdit: false,
+                          function: () {},
                         );
                       },
                     ),

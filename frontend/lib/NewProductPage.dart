@@ -14,14 +14,19 @@ import 'main.dart';
 enum category { action, strategic, survival, sport, shooter }
 
 class NewProductPage extends StatefulWidget {
-  const NewProductPage({Key? key, required this.product, required this.isEdit})
+  const NewProductPage(
+      {Key? key,
+      required this.product,
+      required this.isEdit,
+      required this.function})
       : super(key: key);
   final Product product;
   final bool isEdit;
+  final Function function;
   @override
   // ignore: no_logic_in_create_state
   State<NewProductPage> createState() => isEdit
-      ? _NewProductPageState.edit(product)
+      ? _NewProductPageState.edit(product, function)
       : _NewProductPageState.addNew();
 }
 
@@ -43,7 +48,7 @@ class _NewProductPageState extends State<NewProductPage> {
     });
     _categorie = Categories.full('name', '', 0);
   }
-  _NewProductPageState.edit(Product p) {
+  _NewProductPageState.edit(Product p, this._function) {
     isEdit = true;
     product = p;
     nameCon = TextEditingController(text: product.name);
@@ -62,6 +67,7 @@ class _NewProductPageState extends State<NewProductPage> {
       }
     });
   }
+  late Function _function;
 
   late Categories _categorie;
 
@@ -86,7 +92,7 @@ class _NewProductPageState extends State<NewProductPage> {
   }
 
   final snackBarError = const SnackBar(
-      content: Text('can not use this email'),
+      content: Text('error'),
       backgroundColor: Colors.redAccent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -106,6 +112,16 @@ class _NewProductPageState extends State<NewProductPage> {
         ),
       ));
 
+  bool firstTime = true;
+
+  String? errorHandeler(String text) {
+    if (text.isEmpty) {
+      return 'required';
+    } else {
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -114,13 +130,14 @@ class _NewProductPageState extends State<NewProductPage> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(20),
           child: Column(
             children: [
               TextField(
                 controller: nameCon,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   border: OutlineInputBorder(),
+                  errorText: firstTime ? null : errorHandeler(nameCon.text),
                   labelText: 'Product Name',
                   hintText: 'Name',
                   contentPadding: EdgeInsets.all(20),
@@ -131,8 +148,9 @@ class _NewProductPageState extends State<NewProductPage> {
               ),
               TextField(
                 controller: vendorCon,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   border: OutlineInputBorder(),
+                  errorText: firstTime ? null : errorHandeler(vendorCon.text),
                   labelText: 'Product Vendor',
                   hintText: 'Vendor',
                   contentPadding: EdgeInsets.all(20),
@@ -146,9 +164,11 @@ class _NewProductPageState extends State<NewProductPage> {
                   Expanded(
                     child: TextField(
                       controller: buyPriceCon,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         labelText: 'Product Buy Price',
+                        errorText:
+                            firstTime ? null : errorHandeler(buyPriceCon.text),
                         hintText: 'buy',
                         contentPadding: EdgeInsets.all(20),
                       ),
@@ -160,9 +180,11 @@ class _NewProductPageState extends State<NewProductPage> {
                   Expanded(
                     child: TextField(
                       controller: sellPriceCon,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         labelText: 'Product sell Price',
+                        errorText:
+                            firstTime ? null : errorHandeler(sellPriceCon.text),
                         hintText: 'sell',
                         contentPadding: EdgeInsets.all(20),
                       ),
@@ -178,10 +200,12 @@ class _NewProductPageState extends State<NewProductPage> {
                 maxLines: 5,
                 keyboardType: TextInputType.multiline,
                 controller: descriptionCon,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Product Description',
                   hintText: 'Description',
+                  errorText:
+                      firstTime ? null : errorHandeler(descriptionCon.text),
                   contentPadding: EdgeInsets.all(20),
                 ),
               ),
@@ -193,9 +217,10 @@ class _NewProductPageState extends State<NewProductPage> {
                   setState(() {});
                 },
                 controller: imageUrlCon,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Product Image URL',
+                  errorText: firstTime ? null : errorHandeler(imageUrlCon.text),
                   hintText: 'URL',
                   contentPadding: EdgeInsets.all(20),
                 ),
@@ -249,6 +274,9 @@ class _NewProductPageState extends State<NewProductPage> {
                         controller: categoryCon,
                         focusNode: AlwaysDisabledFocusNode(),
                         decoration: InputDecoration(
+                          errorText: firstTime
+                              ? null
+                              : errorHandeler(categoryCon.text),
                           border: OutlineInputBorder(),
                           icon: _categorie.imageURL.isEmpty
                               ? null
@@ -291,7 +319,9 @@ class _NewProductPageState extends State<NewProductPage> {
               TextField(
                 focusNode: AlwaysDisabledFocusNode(),
                 controller: gameReleaseDateCon,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
+                  errorText:
+                      firstTime ? null : errorHandeler(gameReleaseDateCon.text),
                   icon: Icon(Icons.date_range),
                   border: OutlineInputBorder(),
                   labelText: 'Product release Date',
@@ -321,8 +351,11 @@ class _NewProductPageState extends State<NewProductPage> {
                         ? ElevatedButton(
                             onPressed: () async {
                               empty();
+                              setState(() {
+                                firstTime = false;
+                              });
 
-                              if (isEmpty) {
+                              if (!isEmpty) {
                                 final Uri url = Uri.parse(
                                     "${MyApp.url}/edit-product-information");
                                 final headers = {
@@ -347,6 +380,7 @@ class _NewProductPageState extends State<NewProductPage> {
                                 ScaffoldMessenger.of(context)
                                     .showSnackBar(snackBarSuccess);
                                 Navigator.pop(context);
+                                _function();
                               } else if (!isEmpty) {
                                 ScaffoldMessenger.of(context)
                                     .showSnackBar(snackBarError);
@@ -355,7 +389,42 @@ class _NewProductPageState extends State<NewProductPage> {
                             child: const Text('submit edit'),
                           )
                         : ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () async {
+                              empty();
+                              setState(() {
+                                firstTime = false;
+                              });
+
+                              if (!isEmpty) {
+                                final Uri url = Uri.parse(
+                                    "${MyApp.url}/register-product-information");
+                                final headers = {
+                                  'Content-Type': 'application/json'
+                                };
+                                final response = await http.post(url,
+                                    headers: headers,
+                                    body: json.encode({
+                                      "productName": nameCon.text,
+                                      "productVendor": vendorCon.text,
+                                      "buyPrice": int.parse(buyPriceCon.text),
+                                      "salePrice": int.parse(sellPriceCon.text),
+                                      "textDescription": descriptionCon.text,
+                                      "image": imageUrlCon.text,
+                                      "gameReleaseDate":
+                                          gameReleaseDateCon.text,
+                                      "category": _categorie.code
+                                    }));
+                                var decoded = json.decode(response.body);
+
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(snackBarSuccess);
+                                Navigator.pop(context);
+                                _function();
+                              } else if (isEmpty) {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(snackBarError);
+                              }
+                            },
                             child: const Text('add'),
                           ),
                   ),
