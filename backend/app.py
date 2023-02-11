@@ -64,25 +64,21 @@ def registerProductInformation(req: dict):
             if record[0] >= id:
                 id = record[0] + 1
                     
-    insert_script = 'INSERT INTO "OnlineShop".products (productID, productName, productVendor, buyPrice, salePrice, textDescription, image, gameReleaseDate) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'
-    insert_value = (id, req["productName"], req["productVendor"], req["buyPrice"], req["salePrice"], req["textDescription"], req["image"], req["gameReleaseDate"])
+    insert_script = 'INSERT INTO "OnlineShop".products (productID, productName, productVendor, buyPrice, salePrice, textDescription, image, gameReleaseDate, category) VALUES (%s ,%s, %s, %s, %s, %s, %s, %s, %s)'
+    insert_value = (id, req["productName"], req["productVendor"], req["buyPrice"], req["salePrice"], req["textDescription"], req["image"], req["gameReleaseDate"], req["category"])
     cur.execute(insert_script, insert_value)
     conn.commit()
     return {"registerProductInformation": True}
 
-@app.patch("/edit-product-information")
+@app.post("/edit-product-information")
 def editProductInformation(req: dict):
     conn, cur = create_connection()
     cur.execute('SELECT * FROM "OnlineShop".products')
-    for record in cur.fetchall():
-        if record[0] == req["productID"]:
-            update_script = 'UPDATE "OnlineShop".products SET productName = %s, productVendor = %s, buyPrice = %s, salePrice = %s, textDescription = %s, image = %s, gameReleaseDate = %s'
-            update_value = (req["productName"], req["productVendor"], req["buyPrice"], req["salePrice"], req["textDescription"], req["image"], req["gameReleaseDate"])
-            cur.execute(update_script, update_value)
-            conn.commit()
-            return {"wrongID": False}
-        else:
-            return {"wrongID": True}
+    update_script = 'UPDATE "OnlineShop".products SET productName = %s, productVendor = %s, buyPrice = %s, salePrice = %s, textDescription = %s, image = %s, gameReleaseDate = %s, category = %s where productID = %s'
+    update_value = (req["productName"], req["productVendor"], req["buyPrice"], req["salePrice"], req["textDescription"], req["image"], req["gameReleaseDate"], req["category"], req["productID"])
+    cur.execute(update_script, update_value)
+    conn.commit()
+    return {"isEditProduct": True}
 
 @app.get("/product-search")
 def productSearch():
@@ -151,8 +147,8 @@ def customerOrderConfirmation(req: dict):
         if conn is not None:    
             conn.close() 
 
-@app.get("/sort-product-release")
-def sortProductRelease():
+@app.get("/get-sort-product-release")
+def getSortProductRelease():
     sort_product = []
     conn, cur = create_connection()
     cur.execute('SELECT * FROM "OnlineShop".products')
@@ -161,7 +157,8 @@ def sortProductRelease():
                         "productName": record[1],
                         "salePrice": record[4],
                         "image": record[6],
-                        "gameReleaseDate": record[7]})
+                        "gameReleaseDate": record[7],
+                        "category": record[8]})
     sort_product.sort(key=lambda sort_product: sort_product["gameReleaseDate"])    
     return sort_product
 
@@ -177,14 +174,15 @@ def getProduct(req: dict):
                        "salePrice": record[4],
                        "textDescription": record[5],
                        "image": record[6],
-                       "gameReleaseDate": record[7]}
+                       "gameReleaseDate": record[7],
+                       "category": record[8]}
     return product
 
 @app.post("/get-product-order")
 def getProductOrder(req: dict):
     products =[]
     conn, cur = create_connection()
-    cur.execute('''select p.productid ,p.productname ,p.productvendor ,p.buyprice ,p.saleprice , p.textdescription ,p.image ,p.gamereleasedate, o.customerid ,o.orderid 
+    cur.execute('''select p.productid ,p.productname ,p.productvendor ,p.buyprice ,p.saleprice , p.textdescription ,p.image ,p.gamereleasedate ,category ,o.customerid ,o.orderid 
                 from "OnlineShop".orders o join "OnlineShop".products p 
                 on o.orderid = p.orderid ''')
     for record in cur.fetchall():
@@ -198,7 +196,8 @@ def getProductOrder(req: dict):
                         "textDescription": record[5],
                         "image": record[6],
                         "gameReleaseDate": record[7],
-                        "orderID": record[9]})     
+                        "category": record[8],
+                        "orderID": record[10]})     
     return products
 
 @app.post("/delete-order")
