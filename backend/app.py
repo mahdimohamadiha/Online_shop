@@ -9,14 +9,14 @@ def localTime():
     return localTime
 
 def shippedTime():
-    shippedTime = time.ctime(time.time() + 432,000)
+    shippedTime = time.ctime(time.time() + 432000)
     return shippedTime
 
 def create_connection():
         conn = psycopg2.connect(
                 host = '78.38.35.219',
-                dbname = '99463167',
-                user = '99463167',
+                dbname = '99463127',
+                user = '99463127',
                 password = '123456',
                 port = 5432
             )
@@ -117,36 +117,21 @@ def registrationProductsOrder(req: dict):
     cur.execute(insert_script, insert_value)
     conn.commit()
     cur.execute('SELECT * FROM "OnlineShop".products')
-    insert_script = 'UPDATE "OnlineShop".products SET orderID = %s where productid = %s '    
+    insert_script = 'UPDATE "OnlineShop".products SET orderID = %s where productid = %s'    
     update_value = (id, req["productID"])
     cur.execute(insert_script, update_value)
     conn.commit()
     return {"isRegistrationProductsOrder": True}
 
-@app.patch("/customer-order-confirmation")
+@app.post("/customer-order-confirmation")
 def customerOrderConfirmation(req: dict):
-    conn = None
-    cur = None
-    try:
-        conn, cur = create_connection()
-        cur.execute('SELECT * FROM "OnlineShop".orders')
-        for record in cur.fetchall():
-            if record[0] == req["orderID"]:
-                update_script = 'UPDATE "OnlineShop".products SET confirmationDate = %s, shippedDate = %s, status = %s'
-                update_value = (localTime(), shippedTime(), 1)
-                cur.execute(update_script, update_value)
-                conn.commit()
-                return {"wrongID": "False"}
-            else:
-                return {"wrongID": "True"}
-    except Exception as erorr:
-        print(erorr)
-    finally:
-        if cur is not None:
-            cur.close()
-        if conn is not None:    
-            conn.close() 
-
+    conn, cur = create_connection()
+    update_script = 'UPDATE "OnlineShop".orders SET confirmationDate = %s, status = %s where orderID = %s'
+    update_value = (localTime(), 2, req["orderID"])
+    cur.execute(update_script, update_value)
+    conn.commit()
+    return {"isCustomerOrderConfirmation": True}
+                
 @app.get("/get-sort-product-release")
 def getSortProductRelease():
     sort_product = []
@@ -248,4 +233,26 @@ def getExpert(req: dict):
                        "employeeNeme": record[4],
                        "employeePass": record[5]}
     return expert
+
+@app.get('/get-registered-orders')
+def getRegisteredOrders():
+    registered_orders = []
+    conn, cur = create_connection()
+    cur.execute('''select o.orderID, o.requiredDate, o.status, p.productName, p.salePrice, p.image, c.customerFullName, c.customerEmail
+                   from "OnlineShop".orders o join "OnlineShop".products p on o.orderid = p.orderid join "OnlineShop".customers c on c.customerid = o.customerid
+                   where o.status = 1''')
+    for record in cur.fetchall(): 
+        registered_orders.append({
+            "orderID": record[0],
+            "requiredDate": record[1],
+            "status": record[2],
+            "productName": record[3],
+            "salePrice": record[4],
+            "image": record[5],
+            "customerFullName": record[6],
+            "customerEmail": record[7]})
+    
+    return registered_orders
+
+
 
