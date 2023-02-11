@@ -8,20 +8,33 @@ def localTime():
     localTime = time.ctime(time.time())
     return localTime
 
+
 def shippedTime():
     shippedTime = time.ctime(time.time() + 432000)
     return shippedTime
 
+
 def create_connection():
         conn = psycopg2.connect(
                 host = '78.38.35.219',
-                dbname = '99463127',
-                user = '99463127',
+                dbname = '99463167',
+                user = '99463167',
                 password = '123456',
                 port = 5432
             )
         cur = conn.cursor()
         return conn, cur
+    
+    
+@app.post('/login')
+def login(req: dict):
+        conn, cur = create_connection()
+        cur.execute('SELECT * FROM "OnlineShop".customers')
+        for record in cur.fetchall():
+            if record[5] == req["customerEmail"] and record[6] == req["password"]:
+                return {"customerID": record[0]}
+        return {"customerID": 0}
+
 
 @app.post("/signup")
 def signup(req: dict):
@@ -32,7 +45,8 @@ def signup(req: dict):
         if record[0] is None:
             id = 1
         else:
-            id = record[0] + 1
+            if record[0] >= id:
+                id = record[0] + 1
         if record[5] == req["customerEmail"]:
             return {"isExistEmail": True}
             
@@ -40,17 +54,55 @@ def signup(req: dict):
     insert_value = (id ,req["customerFullName"], req["phone"], req["city"], req["address"], req["customerEmail"], req["password"], 1)
     cur.execute(insert_script, insert_value)
     conn.commit()
+    
     return {"isExistEmail": False}
 
-@app.post('/login')
-def login(req: dict):
-        conn, cur = create_connection()
-        cur.execute('SELECT * FROM "OnlineShop".customers')
-        for record in cur.fetchall():
-            if record[5] == req["customerEmail"] and record[6] == req["password"]:
-                return {"customerID": record[0]}
-        return {"customerID": 0}
+
+@app.get("/product-search")
+def productSearch():
+    products = []
+    conn, cur = create_connection()
+    cur.execute('SELECT * FROM "OnlineShop".products')
+    for record in cur.fetchall():
+        products.append({"productID": record[0],
+                            "productName": record[1]}) 
+            
+    return products
     
+    
+@app.post("/registration-products-order")
+def registrationProductsOrder(req: dict):
+    id = 1
+    conn, cur = create_connection()
+    cur.execute('SELECT * FROM "OnlineShop".orders')
+    for record in cur.fetchall():
+        if record[0] is None:
+            id = 1
+        else:
+            if record[0] >= id:
+                id = record[0] + 1
+            
+    insert_script = 'INSERT INTO "OnlineShop".orders (orderID, confirmationDate, requiredDate, shippedDate, status, comments, customerID) VALUES (%s,%s,%s,%s,%s,%s,%s)'
+    insert_value = (id, None, localTime(), None, 1, None, req["customerID"])
+    cur.execute(insert_script, insert_value)
+    conn.commit()
+    cur.execute('SELECT * FROM "OnlineShop".products')
+    insert_script = 'UPDATE "OnlineShop".products SET orderID = %s where productid = %s'    
+    update_value = (id, req["productID"])
+    cur.execute(insert_script, update_value)
+    conn.commit()
+    return {"isRegistrationProductsOrder": True} 
+
+
+@app.post('/login-expert')
+def loginExpert(req: dict):
+    conn, cur = create_connection()
+    cur.execute('SELECT * FROM "OnlineShop".experts')
+    for record in cur.fetchall():
+        if record[4] == req["employeeNeme"] and record[5] == req["employeePass"]:
+            return {"expertID": record[0]}
+    return {"expertID": 0}   
+
 
 @app.post("/register-product-information")
 def registerProductInformation(req: dict):
@@ -68,7 +120,9 @@ def registerProductInformation(req: dict):
     insert_value = (id, req["productName"], req["productVendor"], req["buyPrice"], req["salePrice"], req["textDescription"], req["image"], req["gameReleaseDate"], req["category"])
     cur.execute(insert_script, insert_value)
     conn.commit()
+    
     return {"registerProductInformation": True}
+
 
 @app.post("/edit-product-information")
 def editProductInformation(req: dict):
@@ -78,50 +132,9 @@ def editProductInformation(req: dict):
     update_value = (req["productName"], req["productVendor"], req["buyPrice"], req["salePrice"], req["textDescription"], req["image"], req["gameReleaseDate"], req["category"], req["productID"])
     cur.execute(update_script, update_value)
     conn.commit()
+    
     return {"isEditProduct": True}
 
-@app.get("/product-search")
-def productSearch():
-    conn = None
-    cur = None
-    products = []
-    try:
-        conn, cur = create_connection()
-        cur.execute('SELECT * FROM "OnlineShop".products')
-        for record in cur.fetchall():
-            products.append({"productID": record[0],
-                             "productName": record[1]})
-            
-    except Exception as erorr:
-        print(erorr)
-    finally:
-        if cur is not None:
-            cur.close()
-        if conn is not None:    
-            conn.close()    
-    return products
-
-@app.post("/registration-products-order")
-def registrationProductsOrder(req: dict):
-    id = 1
-    conn, cur = create_connection()
-    cur.execute('SELECT * FROM "OnlineShop".orders')
-    for record in cur.fetchall():
-        if record[0] is None:
-            id = 1
-        else:
-            id = record[0] + 1
-            
-    insert_script = 'INSERT INTO "OnlineShop".orders (orderID, confirmationDate, requiredDate, shippedDate, status, comments, customerID) VALUES (%s,%s,%s,%s,%s,%s,%s)'
-    insert_value = (id, None, localTime(), None, 1, None, req["customerID"])
-    cur.execute(insert_script, insert_value)
-    conn.commit()
-    cur.execute('SELECT * FROM "OnlineShop".products')
-    insert_script = 'UPDATE "OnlineShop".products SET orderID = %s where productid = %s'    
-    update_value = (id, req["productID"])
-    cur.execute(insert_script, update_value)
-    conn.commit()
-    return {"isRegistrationProductsOrder": True}
 
 @app.post("/customer-order-confirmation")
 def customerOrderConfirmation(req: dict):
@@ -130,7 +143,9 @@ def customerOrderConfirmation(req: dict):
     update_value = (localTime(), 2, req["orderID"])
     cur.execute(update_script, update_value)
     conn.commit()
+    
     return {"isCustomerOrderConfirmation": True}
+          
                 
 @app.get("/get-sort-product-release")
 def getSortProductRelease():
@@ -147,6 +162,7 @@ def getSortProductRelease():
     sort_product.sort(key=lambda sort_product: sort_product["gameReleaseDate"])    
     return sort_product
 
+
 @app.post("/get-product")
 def getProduct(req: dict):
     conn, cur = create_connection()
@@ -161,7 +177,9 @@ def getProduct(req: dict):
                        "image": record[6],
                        "gameReleaseDate": record[7],
                        "category": record[8]}
+            
     return product
+
 
 @app.post("/get-product-order")
 def getProductOrder(req: dict):
@@ -183,7 +201,9 @@ def getProductOrder(req: dict):
                         "gameReleaseDate": record[7],
                         "category": record[8],
                         "orderID": record[10]})     
+            
     return products
+
 
 @app.post("/delete-order")
 def deleteOrder(req: dict):
@@ -196,15 +216,7 @@ def deleteOrder(req: dict):
     cur.execute(delete_script, delete_value)
     conn.commit()
     return {"isDelete": True}
-
-@app.post('/login-expert')
-def loginExpert(req: dict):
-    conn, cur = create_connection()
-    cur.execute('SELECT * FROM "OnlineShop".experts')
-    for record in cur.fetchall():
-        if record[4] == req["employeeNeme"] and record[5] == req["employeePass"]:
-            return {"expertID": record[0]}
-    return {"expertID": 0}
+    
     
 @app.post('/get-customer')
 def getCustomer(req: dict):
@@ -219,7 +231,9 @@ def getCustomer(req: dict):
                        "customerEmail": record[5],
                        "password": record[6],
                        "expertID": record[7]}
+            
     return customer
+
 
 @app.post('/get-expert')
 def getExpert(req: dict):
@@ -232,7 +246,9 @@ def getExpert(req: dict):
                        "jobTitle": record[3],
                        "employeeNeme": record[4],
                        "employeePass": record[5]}
+            
     return expert
+
 
 @app.get('/get-registered-orders')
 def getRegisteredOrders():
