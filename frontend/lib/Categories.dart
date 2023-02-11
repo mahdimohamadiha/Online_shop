@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 class Categories {
   String name;
   String imageURL;
-  Categories.full(this.name, this.imageURL);
+  int code;
+  Categories.full(this.name, this.imageURL, this.code);
 }
 
 class CategoriesContainer extends StatelessWidget {

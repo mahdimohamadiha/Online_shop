@@ -8,7 +8,25 @@ import 'package:online_shop/product.dart';
 import 'package:http/http.dart' as http;
 
 class homePage extends StatefulWidget {
-  const homePage({Key? key}) : super(key: key);
+  homePage({Key? key}) : super(key: key);
+  // final Categories action =
+  //     Categories.full('Action', 'asset/image/CategoriesImage/action.png');
+  // final Categories strategic =
+  //     Categories.full('strategic', 'asset/image/CategoriesImage/strategic.png');
+  // final Categories survival =
+  //     Categories.full('survival', 'asset/image/CategoriesImage/survival.png');
+  // final Categories sport =
+  //     Categories.full('sport', 'asset/image/CategoriesImage/sport.png');
+  // final Categories shooter =
+  //     Categories.full('shooter', 'asset/image/CategoriesImage/shooter.png');
+  static List<Categories> categories = [
+    Categories.full('Action', 'asset/image/CategoriesImage/action.png', 1),
+    Categories.full(
+        'strategic', 'asset/image/CategoriesImage/strategic.png', 2),
+    Categories.full('survival', 'asset/image/CategoriesImage/survival.png', 3),
+    Categories.full('sport', 'asset/image/CategoriesImage/sport.png', 4),
+    Categories.full('shooter', 'asset/image/CategoriesImage/shooter.png', 5)
+  ];
 
   @override
   State<homePage> createState() => _homePageState();
@@ -22,28 +40,6 @@ class _homePageState extends State<homePage> {
   // Product product3 =
   //     Product.full('Cod', 'discription', 'asset/image/download.jpg', '150', 2);
 
-  List<Categories> categories = [];
-
-  Categories action =
-      Categories.full('Action', 'asset/image/CategoriesImage/action.png');
-  Categories strategic =
-      Categories.full('strategic', 'asset/image/CategoriesImage/strategic.png');
-  Categories survival =
-      Categories.full('survival', 'asset/image/CategoriesImage/survival.png');
-  Categories sport =
-      Categories.full('sport', 'asset/image/CategoriesImage/sport.png');
-  Categories shooter =
-      Categories.full('shooter', 'asset/image/CategoriesImage/shooter.png');
-
-  void productset() {
-    // Future<dynamic> setState(() async {
-    //   final Uri url = Uri.parse("http://192.168.135.63:8000/home");
-    //   final headers = {'Content-Type': 'application/json'};
-    //   final response = await http.get(url, headers: headers);
-    //   var decoded = json.decode(response.body);
-    //   print(decoded);
-    // });
-  }
   List<Product> products = [];
   Future<void> productsetdata() async {
     products = [];
@@ -69,13 +65,6 @@ class _homePageState extends State<homePage> {
   @override
   void initState() {
     productsetdata();
-    categories = [];
-    categories.add(action);
-    categories.add(strategic);
-    categories.add(survival);
-    categories.add(sport);
-    categories.add(shooter);
-    // final Uri url = Uri.parse("http://10.0.2.2:8000/home");
     super.initState();
   }
 
@@ -126,7 +115,7 @@ class _homePageState extends State<homePage> {
                           )
                         : ListView.builder(
                             physics: const AlwaysScrollableScrollPhysics(),
-                            itemCount: 4,
+                            itemCount: 3,
                             scrollDirection: Axis.horizontal,
                             itemBuilder: (context, index) {
                               var result = products[index];
@@ -195,10 +184,10 @@ class _homePageState extends State<homePage> {
               height: 100,
               child: ListView.builder(
                 physics: const AlwaysScrollableScrollPhysics(),
-                itemCount: categories.length,
+                itemCount: homePage.categories.length,
                 scrollDirection: Axis.horizontal,
                 itemBuilder: (context, index) {
-                  var cat = categories[index];
+                  var cat = homePage.categories[index];
                   return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: CategoriesContainer(

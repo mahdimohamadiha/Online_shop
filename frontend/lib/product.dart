@@ -10,17 +10,10 @@ class Product {
   late String imageURL;
   late String gameReleaseDate;
   late int orderID;
+  late int categoryCode;
 
-  Product.product(
-    this.ID,
-    this.name,
-    this.vendor,
-    this.price,
-    this.buyPrice,
-    this.discription,
-    this.imageURL,
-    this.gameReleaseDate,
-  );
+  Product.product(this.ID, this.name, this.vendor, this.price, this.buyPrice,
+      this.discription, this.imageURL, this.gameReleaseDate, this.categoryCode);
   Product.productAsOrder(
       this.ID,
       this.name,

@@ -37,14 +37,16 @@ class CustomSearchDelegate extends SearchDelegate {
     var decoded = json.decode(response.body);
     print(id);
     product = Product.product(
-        id,
-        decoded['productName'],
-        decoded['productVendor'],
-        decoded['salePrice'],
-        decoded['buyPrice'],
-        decoded['textDescription'],
-        decoded['image'],
-        decoded['gameReleaseDate']);
+      id,
+      decoded['productName'],
+      decoded['productVendor'],
+      decoded['salePrice'],
+      decoded['buyPrice'],
+      decoded['textDescription'],
+      decoded['image'],
+      decoded['gameReleaseDate'],
+      decoded['gameReleaseDate'],
+    );
   }
 
   List<Product> searchTerms = [];

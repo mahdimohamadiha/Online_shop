@@ -1,10 +1,15 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:online_shop/Categories.dart';
+import 'package:online_shop/home-page.dart';
 import 'package:online_shop/product.dart';
 import 'package:online_shop/user.dart';
+
+enum category { action, strategic, survival, sport, shooter }
 
 class NewProductPage extends StatefulWidget {
   const NewProductPage({Key? key}) : super(key: key);
@@ -30,8 +35,14 @@ class _NewProductPageState extends State<NewProductPage> {
   TextEditingController descriptionCon = TextEditingController();
   TextEditingController imageUrlCon = TextEditingController();
   TextEditingController gameReleaseDateCon = TextEditingController();
+  TextEditingController categoryCon = TextEditingController();
 
-  _NewProductPageState.addNew() {}
+  _NewProductPageState.addNew() {
+    homePage.categories.forEach((element) {
+      cats.add(element.name);
+    });
+    _categorie = Categories.full('name', '', 0);
+  }
   _NewProductPageState.edit(Product p) {
     isEdit = true;
     product = p;
@@ -42,9 +53,20 @@ class _NewProductPageState extends State<NewProductPage> {
     descriptionCon = TextEditingController(text: product.discription);
     imageUrlCon = TextEditingController(text: product.imageURL);
     gameReleaseDateCon = TextEditingController(text: product.gameReleaseDate);
+    categoryCon = TextEditingController(
+        text: homePage.categories[product.categoryCode - 1].name);
+    homePage.categories.forEach((element) {
+      cats.add(element.name);
+      if (element.name == categoryCon.text) {
+        _categorie = element;
+      }
+    });
   }
 
+  late Categories _categorie;
+
   late Product product;
+  List<String> cats = [];
 
   @override
   Widget build(BuildContext context) {
@@ -173,20 +195,57 @@ class _NewProductPageState extends State<NewProductPage> {
                     return Center(
                         child: loadingProgress.expectedTotalBytes != null
                             ? Text('error')
-                            : null
-
-                        // CircularProgressIndicator(
-                        //   value: loadingProgress.expectedTotalBytes != null
-                        //       ? loadingProgress.cumulativeBytesLoaded /
-                        //           loadingProgress.expectedTotalBytes!
-                        //       : 100,
-                        // )
-                        );
+                            : null);
                   },
                 ),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                     color: Colors.grey,
                     borderRadius: BorderRadius.all(Radius.circular(10))),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: TextField(
+                        controller: categoryCon,
+                        focusNode: AlwaysDisabledFocusNode(),
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          icon: _categorie.imageURL.isEmpty
+                              ? null
+                              : ImageIcon(
+                                  AssetImage(
+                                    _categorie.imageURL,
+                                  ),
+                                  color: Colors.black,
+                                ),
+                          labelText: 'Product category',
+                          contentPadding: EdgeInsets.all(20),
+                        ),
+                      ),
+                    ),
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.arrow_drop_down),
+                      onSelected: (String value) {
+                        categoryCon.text = value;
+                        setState(() {
+                          homePage.categories.forEach((element) {
+                            if (value == element.name) {
+                              _categorie = element;
+                            }
+                          });
+                        });
+                      },
+                      itemBuilder: (BuildContext context) {
+                        return cats.map<PopupMenuItem<String>>((String value) {
+                          return PopupMenuItem(
+                              child: Text(value), value: value);
+                        }).toList();
+                      },
+                    ),
+                  ],
+                ),
               ),
               SizedBox(
                 height: 20,
@@ -240,6 +299,7 @@ class _NewProductPageState extends State<NewProductPage> {
                         descriptionCon.text = '';
                         imageUrlCon.text = '';
                         gameReleaseDateCon.text = '';
+                        categoryCon.text = '';
                       },
                       child: Text(
                         'clear',
