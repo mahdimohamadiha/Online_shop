@@ -26,7 +26,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
     getOrdersAPI();
   }
   Future<void> getOrdersAPI() async {
-    final Uri url = Uri.parse("${MyApp.url}/login");
+    final Uri url = Uri.parse("${MyApp.url}/get-product-order");
     final headers = {'Content-Type': 'application/json'};
     final response = await http.post(url,
         headers: headers,
@@ -34,22 +34,32 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
           "customerID": ProfilePage.user.id,
         }));
     List<dynamic> decoded = json.decode(response.body);
-    for (int i = 0; i < decoded.length; i++) {
-      Product product = Product.productAsOrder(
-          decoded[i]['productID'],
-          decoded[i]['productName'],
-          decoded[i]['productVendor'],
-          decoded[i]['salePrice'],
-          decoded[i]['buyPrice'],
-          decoded[i]['textDescription'],
-          decoded[i]['image'],
-          decoded[i]['gameReleaseDate'],
-          decoded[i]['orderID']);
-      orders.add(product);
+    print(decoded);
+    if (decoded.isNotEmpty) {
+      for (int i = 0; i < decoded.length; i++) {
+        Product product = Product.productAsOrder(
+            decoded[i]['productID'],
+            decoded[i]['productName'],
+            decoded[i]['productVendor'],
+            decoded[i]['salePrice'],
+            decoded[i]['buyPrice'],
+            decoded[i]['textDescription'],
+            decoded[i]['image'],
+            decoded[i]['gameReleaseDate'],
+            decoded[i]['orderID']);
+        orders.add(product);
+      }
     }
   }
 
   List<Product> orders = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getOrdersAPI();
+  }
 
   @override
   Widget build(BuildContext context) {

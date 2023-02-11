@@ -1,9 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:online_shop/ProfilePage.dart';
 import 'package:online_shop/product.dart';
+import 'package:http/http.dart' as http;
 
 import 'NewProductPage.dart';
+import 'main.dart';
 
 class ProductPage extends StatefulWidget {
   final Product product;
@@ -172,9 +176,25 @@ class _ProductPageState extends State<ProductPage> {
                                 )
                               : ElevatedButton(
                                   child: Text("add to shopping card"),
-                                  onPressed: () {
+                                  onPressed: () async {
                                     if (ProfilePage.logedIn) {
-                                      ProfilePage.user.orders.add(product);
+                                      final headers = {
+                                        'Content-Type': 'application/json'
+                                      };
+                                      Uri urlGetProduct = Uri.parse(
+                                          "${MyApp.url}/registration-products-order");
+                                      final response = await http.post(
+                                          urlGetProduct,
+                                          headers: headers,
+                                          body: json.encode({
+                                            'productID': product.ID,
+                                            'customerID': ProfilePage.user.id
+                                          }));
+                                      var decoded = json.decode(response.body);
+                                      print(decoded);
+                                      print(product.ID);
+                                      print(ProfilePage.user.id);
+
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(snackBarSuccess);
                                     } else {
