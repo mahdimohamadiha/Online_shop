@@ -191,8 +191,8 @@ def registerProductInformation(req: dict):
             if record[0] >= id:
                 id = record[0] + 1
                     
-    insert_script = 'INSERT INTO "OnlineShop".products (productID, productName, productVendor, buyPrice, salePrice, textDescription, image, gameReleaseDate, category) VALUES (%s ,%s, %s, %s, %s, %s, %s, %s, %s)'
-    insert_value = (id, req["productName"], req["productVendor"], req["buyPrice"], req["salePrice"], req["textDescription"], req["image"], req["gameReleaseDate"], req["category"])
+    insert_script = 'INSERT INTO "OnlineShop".products (productID, productName, productPublisher, buyPrice, salePrice, discountedPrice, textDescription, image, gameReleaseDate, stock, categoryID) VALUES (%s ,%s, %s, %s, %s, %s, %s, %s, %s,%s, %s)'
+    insert_value = (id, req["productName"], req["productPublisher"], req["buyPrice"], req["salePrice"], req["discountedPrice"], req["textDescription"], req["image"], req["gameReleaseDate"], req["stock"], req["categoryID"])
     cur.execute(insert_script, insert_value)
     conn.commit()
     
@@ -226,7 +226,7 @@ def customerOrderConfirmation(req: dict):
 def getSortProductRelease():
     sort_product = []
     conn, cur = create_connection()
-    cur.execute('SELECT * FROM "OnlineShop".products')
+    cur.execute('SELECT * FROM "OnlineShop".products p join "OnlineShop".category c on p.categoryID = c.categoryID')
     for record in cur.fetchall():
         sort_product.append({"productID": record[0],
                         "productName": record[1],
@@ -234,7 +234,8 @@ def getSortProductRelease():
                         "discountedPrice": record[5],
                         "image": record[7],
                         "gameReleaseDate": record[8],
-                        "category": record[10]})
+                        "category": record[10],
+                        "categoryName": record[12]})
     sort_product.sort(key=lambda sort_product: sort_product["gameReleaseDate"], reverse=True)    
     return sort_product
 
@@ -242,11 +243,11 @@ def getSortProductRelease():
 @app.post("/get-product")
 def getProduct(req: dict):
     conn, cur = create_connection()
-    cur.execute('SELECT * FROM "OnlineShop".products')
+    cur.execute('SELECT * FROM "OnlineShop".products p join "OnlineShop".category c on p.categoryID = c.categoryID')
     for record in cur.fetchall():
         if record[0] == req["productID"]:
             product = {"productName": record[1],
-                       "productVendor": record[2],
+                       "productPublisher": record[2],
                        "buyPrice": record[3],
                        "salePrice": record[4],
                        "discountedPrice": record[5],
@@ -254,7 +255,8 @@ def getProduct(req: dict):
                        "image": record[7],
                        "gameReleaseDate": record[8],
                        "stock": record[9],
-                       "category": record[10]}
+                       "categoryID": record[10],
+                       "categoryName": record[12]}
             
     return product
 
