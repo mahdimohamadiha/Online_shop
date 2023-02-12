@@ -29,12 +29,15 @@ class homePage extends StatefulWidget {
     Categories.full('shooter', 'asset/image/CategoriesImage/shooter.png', 5)
   ];
 
+  static int catCode = 0;
   @override
   State<homePage> createState() => _homePageState();
 }
 
 class _homePageState extends State<homePage> {
   List<Product> products = [];
+  List<Product> catProducts = [];
+
   Future<void> productsetdata() async {
     products = [];
     final Uri url = Uri.parse("${MyApp.url}/get-sort-product-release");
@@ -53,12 +56,43 @@ class _homePageState extends State<homePage> {
         products.add(product);
         print(product.name);
       }
+      catProducts = [];
+      products.forEach((element) {
+        catProducts.add(element);
+      });
+    });
+  }
+
+  Future<void> catProductSetData() async {
+    final Uri url = Uri.parse("${MyApp.url}/product-categories");
+    final headers = {'Content-Type': 'application/json'};
+    final response = await http.post(
+      url,
+      headers: headers,
+      body: json.encode({"category": homePage.catCode}),
+    );
+    List<dynamic> decoded = json.decode(response.body);
+    catProducts = [];
+    setState(() {
+      for (int x = 0; x < decoded.length; x++) {
+        Product product = Product.full(
+            decoded[x]['productName'],
+            decoded[x]['image'],
+            decoded[x]['salePrice'],
+            decoded[x]['productID'],
+            homePage.catCode,
+            decoded[x]['gameReleaseDate']);
+        catProducts.add(product);
+        print(product.name);
+      }
     });
   }
 
   @override
   void initState() {
     productsetdata();
+
+    print(catProducts);
     super.initState();
   }
 
@@ -90,7 +124,13 @@ class _homePageState extends State<homePage> {
                       ),
                       TextButton.icon(
                           onPressed: () {
-                            print("more");
+                            setState(() {
+                              catProducts = [];
+                              products.forEach((element) {
+                                catProducts.add(element);
+                                print('more');
+                              });
+                            });
                           },
                           icon: Icon(Icons.arrow_right),
                           label: Text('more'))
@@ -109,7 +149,7 @@ class _homePageState extends State<homePage> {
                           )
                         : ListView.builder(
                             physics: const AlwaysScrollableScrollPhysics(),
-                            itemCount: products.length,
+                            itemCount: 4,
                             scrollDirection: Axis.horizontal,
                             itemBuilder: (context, index) {
                               var result = products[index];
@@ -201,6 +241,11 @@ class _homePageState extends State<homePage> {
                   return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: CategoriesContainer(
+                        changeCat: () {
+                          setState(() {
+                            catProductSetData();
+                          });
+                        },
                         category: cat,
                       ));
                 },
@@ -209,7 +254,7 @@ class _homePageState extends State<homePage> {
           ),
           SliverList(
               delegate: SliverChildListDelegate(
-                  List.generate(products.length, (index) {
+                  List.generate(catProducts.length, (index) {
             return Padding(
               padding: const EdgeInsets.all(10),
               child: Container(
@@ -221,26 +266,31 @@ class _homePageState extends State<homePage> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Image.network(
-                          products[index].imageURL,
+                          catProducts[index].imageURL,
                           width: 100,
                           height: 100,
                         ),
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            products[index].name,
-                            style: TextStyle(fontSize: 20),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            'price : ${products[index].price.toString()} \$',
-                            style: TextStyle(fontSize: 15),
-                          ),
-                        ],
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              catProducts[index].name,
+                              overflow: TextOverflow.fade,
+                              maxLines: 1,
+                              softWrap: false,
+                              style: TextStyle(fontSize: 20),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              'price : ${catProducts[index].price.toString()} \$',
+                              style: TextStyle(fontSize: 15),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),

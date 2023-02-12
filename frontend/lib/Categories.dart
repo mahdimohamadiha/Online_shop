@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:online_shop/home-page.dart';
 
 class Categories {
   String name;
@@ -8,8 +9,11 @@ class Categories {
 }
 
 class CategoriesContainer extends StatelessWidget {
-  const CategoriesContainer({Key? key, required this.category})
+  const CategoriesContainer(
+      {Key? key, required this.category, required this.changeCat})
       : super(key: key);
+
+  final Function changeCat;
   final Categories category;
   @override
   Widget build(BuildContext context) {
@@ -31,14 +35,8 @@ class CategoriesContainer extends StatelessWidget {
               ),
               child: Image.asset(category.imageURL),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) {
-                      return CategoriesPage(category: category);
-                    },
-                  ),
-                );
+                homePage.catCode = category.code;
+                changeCat();
               },
             ),
           ),
