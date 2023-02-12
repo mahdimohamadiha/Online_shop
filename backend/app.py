@@ -81,19 +81,42 @@ def registrationProductsOrder(req: dict):
         else:
             if record[0] >= id:
                 id = record[0] + 1
-            
-    insert_script = 'INSERT INTO "OnlineShop".orders (orderID, confirmationDate, requiredDate, shippedDate, status, comments, customerID) VALUES (%s,%s,%s,%s,%s,%s,%s)'
-    insert_value = (id, None, localTime(), None, 1, None, req["customerID"])
-    cur.execute(insert_script, insert_value)
-    conn.commit()
-    cur.execute('SELECT * FROM "OnlineShop".products')
-    insert_script = 'UPDATE "OnlineShop".products SET orderID = %s where productid = %s'    
-    update_value = (id, req["productID"])
-    cur.execute(insert_script, update_value)
-    conn.commit()
-    return {"isRegistrationProductsOrder": True} 
+                
+    select_script = 'select p.orderid from "OnlineShop".products p where productid = %s'
+    select_value = (str(req["productID"]))        
+    cur.execute(select_script, select_value)
+    if cur.fetchone()[0] == None:
+        insert_script = 'INSERT INTO "OnlineShop".orders (orderID, confirmationDate, requiredDate, shippedDate, status, comments, customerID) VALUES (%s,%s,%s,%s,%s,%s,%s)'
+        insert_value = (id, None, localTime(), None, 1, None, req["customerID"])
+        cur.execute(insert_script, insert_value)
+        conn.commit()
+        cur.execute('SELECT * FROM "OnlineShop".products')
+        insert_script = 'UPDATE "OnlineShop".products SET orderID = %s where productid = %s'    
+        update_value = (id, req["productID"])
+        cur.execute(insert_script, update_value)
+        conn.commit()
+        return {"isRegistrationProductsOrder": True} 
+    else:
+        return {"isRegistrationProductsOrder": False}
+        
 
-
+@app.post('/product-categories')
+def productCategories(req: dict):
+    conn, cur = create_connection()
+    products = []
+    select_script = 'select p.productid ,p.productname ,p.saleprice ,p.image ,p.gamereleasedate from "OnlineShop".products p where category = %s'
+    select_value = (str(req["category"]))
+    cur.execute(select_script, select_value)
+    for record in cur.fetchall():
+        products.append({
+            "productID": record[0],
+            "productName": record[1],
+            "salePrice": record[2],
+            "image": record[3],
+            "gameReleaseDate": record[4]
+        })
+    return products
+    
 @app.post('/login-expert')
 def loginExpert(req: dict):
     conn, cur = create_connection()
