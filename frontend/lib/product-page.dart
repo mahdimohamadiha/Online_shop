@@ -39,6 +39,16 @@ class _ProductPageState extends State<ProductPage> {
           color: Colors.red,
         ),
       ));
+  final snackBarError2 = const SnackBar(
+      content: Text('can not add this item'),
+      backgroundColor: Colors.redAccent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+            topRight: Radius.circular(10), topLeft: Radius.circular(10)),
+        side: BorderSide(
+          color: Colors.red,
+        ),
+      ));
   final snackBarSuccess = const SnackBar(
       content: Text('this product successfully added'),
       backgroundColor: Colors.greenAccent,
@@ -192,11 +202,14 @@ class _ProductPageState extends State<ProductPage> {
                                           }));
                                       var decoded = json.decode(response.body);
                                       print(decoded);
-                                      print(product.ID);
-                                      print(ProfilePage.user.id);
-
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(snackBarSuccess);
+                                      if (decoded[
+                                          'isRegistrationProductsOrder']) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(snackBarSuccess);
+                                      } else {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(snackBarError2);
+                                      }
                                     } else {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(snackBarError);

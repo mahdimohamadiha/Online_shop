@@ -10,6 +10,7 @@ class Product {
   late String imageURL;
   late String gameReleaseDate;
   late int orderID;
+  late int status;
   late int categoryCode;
 
   Product.product(
@@ -32,7 +33,8 @@ class Product {
       this.discription,
       this.imageURL,
       this.gameReleaseDate,
-      this.orderID);
+      this.orderID,
+      this.status);
 
   Product.full(
     this.name,

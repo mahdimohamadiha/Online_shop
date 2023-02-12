@@ -24,8 +24,10 @@ class CategoriesContainer extends StatelessWidget {
           child: Container(
             width: 80,
             height: 100,
-            decoration: const BoxDecoration(
-                color: Colors.grey,
+            decoration: BoxDecoration(
+                color: homePage.catCode == category.code
+                    ? Colors.grey[600]
+                    : Colors.grey,
                 borderRadius: BorderRadius.all(Radius.circular(15))),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(

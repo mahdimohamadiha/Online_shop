@@ -38,7 +38,9 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex;
   static final List<Widget> _widgetOptions = <Widget>[
-    ShoppingCartPage(goToLoginPage: () {}),
+    ProfilePage.isAdmin
+        ? Text('admin')
+        : ShoppingCartPage(goToLoginPage: () {}),
     homePage(),
     ProfilePage(),
   ];

@@ -54,7 +54,6 @@ class _homePageState extends State<homePage> {
             decoded[x]['category'],
             decoded[x]['gameReleaseDate']);
         products.add(product);
-        print(product.name);
       }
       catProducts = [];
       products.forEach((element) {
@@ -83,7 +82,6 @@ class _homePageState extends State<homePage> {
             homePage.catCode,
             decoded[x]['gameReleaseDate']);
         catProducts.add(product);
-        print(product.name);
       }
     });
   }
@@ -91,8 +89,6 @@ class _homePageState extends State<homePage> {
   @override
   void initState() {
     productsetdata();
-
-    print(catProducts);
     super.initState();
   }
 
@@ -130,6 +126,7 @@ class _homePageState extends State<homePage> {
                                 catProducts.add(element);
                                 print('more');
                               });
+                              homePage.catCode = 0;
                             });
                           },
                           icon: Icon(Icons.arrow_right),
@@ -239,14 +236,27 @@ class _homePageState extends State<homePage> {
                 itemBuilder: (context, index) {
                   var cat = homePage.categories[index];
                   return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: CategoriesContainer(
-                        changeCat: () {
-                          setState(() {
-                            catProductSetData();
-                          });
-                        },
-                        category: cat,
+                      padding: EdgeInsets.all(8.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          boxShadow: homePage.catCode == cat.code
+                              ? [
+                                  BoxShadow(
+                                    color: Colors.grey,
+                                    blurRadius: 20.0, // soften the shadow
+                                    spreadRadius: 1, //extend the shadow
+                                  )
+                                ]
+                              : null,
+                        ),
+                        child: CategoriesContainer(
+                          changeCat: () {
+                            setState(() {
+                              catProductSetData();
+                            });
+                          },
+                          category: cat,
+                        ),
                       ));
                 },
               ),
@@ -259,7 +269,38 @@ class _homePageState extends State<homePage> {
               padding: const EdgeInsets.all(10),
               child: Container(
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    print(catProducts[index].name);
+                    final headers = {'Content-Type': 'application/json'};
+                    Uri urlGetProduct = Uri.parse("${MyApp.url}/get-product");
+                    final response = await http.post(urlGetProduct,
+                        headers: headers,
+                        body:
+                            json.encode({'productID': catProducts[index].ID}));
+                    var decoded = json.decode(response.body);
+                    Product _product = Product.product(
+                      catProducts[index].ID,
+                      decoded['productName'],
+                      decoded['productVendor'],
+                      decoded['salePrice'],
+                      decoded['buyPrice'],
+                      decoded['textDescription'],
+                      decoded['image'],
+                      decoded['gameReleaseDate'],
+                      decoded['category'],
+                    );
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return ProductPage(
+                            product: _product,
+                          );
+                        },
+                      ),
+                    );
+                  },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
