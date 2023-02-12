@@ -203,8 +203,8 @@ def registerProductInformation(req: dict):
 def editProductInformation(req: dict):
     conn, cur = create_connection()
     cur.execute('SELECT * FROM "OnlineShop".products')
-    update_script = 'UPDATE "OnlineShop".products SET productName = %s, productVendor = %s, buyPrice = %s, salePrice = %s, textDescription = %s, image = %s, gameReleaseDate = %s, category = %s where productID = %s'
-    update_value = (req["productName"], req["productVendor"], req["buyPrice"], req["salePrice"], req["textDescription"], req["image"], req["gameReleaseDate"], req["category"], req["productID"])
+    update_script = 'UPDATE "OnlineShop".products SET productName = %s, productPublisher = %s, buyPrice = %s, salePrice = %s, discountedPrice = %s, textDescription = %s, image = %s, gameReleaseDate = %s, stock = %s, categoryID = %s where productID = %s'
+    update_value = (req["productName"], req["productPublisher"], req["buyPrice"], req["salePrice"], req["discountedPrice"], req["textDescription"], req["image"], req["gameReleaseDate"], req["stock"], req["categoryID"], req["productID"])
     cur.execute(update_script, update_value)
     conn.commit()
     
