@@ -175,13 +175,15 @@ class _homePageState extends State<homePage> {
                                       Product _product = Product.product(
                                         result.ID,
                                         decoded['productName'],
-                                        decoded['productVendor'],
+                                        decoded['productPublisher'],
                                         decoded['salePrice'],
                                         decoded['buyPrice'],
+                                        decoded['discountedPrice'],
                                         decoded['textDescription'],
                                         decoded['image'],
                                         decoded['gameReleaseDate'],
-                                        decoded['category'],
+                                        decoded['stock'],
+                                        decoded['categoryID'],
                                       );
 
                                       Navigator.push(
@@ -213,7 +215,7 @@ class _homePageState extends State<homePage> {
                                             maxLines: 1,
                                             softWrap: false,
                                             style: TextStyle(fontSize: 20)),
-                                        Text(result.price.toString()),
+                                        Text(result.sellPrice.toString()),
                                       ],
                                     ),
                                   ),
@@ -263,82 +265,90 @@ class _homePageState extends State<homePage> {
             ),
           ),
           SliverList(
-              delegate: SliverChildListDelegate(
-                  List.generate(catProducts.length, (index) {
-            return Padding(
-              padding: const EdgeInsets.all(10),
-              child: Container(
-                child: ElevatedButton(
-                  onPressed: () async {
-                    print(catProducts[index].name);
-                    final headers = {'Content-Type': 'application/json'};
-                    Uri urlGetProduct = Uri.parse("${MyApp.url}/get-product");
-                    final response = await http.post(urlGetProduct,
-                        headers: headers,
-                        body:
-                            json.encode({'productID': catProducts[index].ID}));
-                    var decoded = json.decode(response.body);
-                    Product _product = Product.product(
-                      catProducts[index].ID,
-                      decoded['productName'],
-                      decoded['productVendor'],
-                      decoded['salePrice'],
-                      decoded['buyPrice'],
-                      decoded['textDescription'],
-                      decoded['image'],
-                      decoded['gameReleaseDate'],
-                      decoded['category'],
-                    );
+            delegate: SliverChildListDelegate(
+              List.generate(
+                catProducts.length,
+                (index) {
+                  return Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Container(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          print(catProducts[index].name);
+                          final headers = {'Content-Type': 'application/json'};
+                          Uri urlGetProduct =
+                              Uri.parse("${MyApp.url}/get-product");
+                          final response = await http.post(urlGetProduct,
+                              headers: headers,
+                              body: json.encode(
+                                  {'productID': catProducts[index].ID}));
+                          var decoded = json.decode(response.body);
+                          Product _product = Product.product(
+                            catProducts[index].ID,
+                            decoded['productName'],
+                            decoded['productPublisher'],
+                            decoded['salePrice'],
+                            decoded['buyPrice'],
+                            decoded['discountedPrice'],
+                            decoded['textDescription'],
+                            decoded['image'],
+                            decoded['gameReleaseDate'],
+                            decoded['stock'],
+                            decoded['categoryID'],
+                          );
 
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return ProductPage(
-                            product: _product,
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return ProductPage(
+                                  product: _product,
+                                );
+                              },
+                            ),
                           );
                         },
-                      ),
-                    );
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Image.network(
-                          catProducts[index].imageURL,
-                          width: 100,
-                          height: 100,
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Text(
-                              catProducts[index].name,
-                              overflow: TextOverflow.fade,
-                              maxLines: 1,
-                              softWrap: false,
-                              style: TextStyle(fontSize: 20),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Image.network(
+                                catProducts[index].imageURL,
+                                width: 100,
+                                height: 100,
+                              ),
                             ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            Text(
-                              'price : ${catProducts[index].price.toString()} \$',
-                              style: TextStyle(fontSize: 15),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    catProducts[index].name,
+                                    overflow: TextOverflow.fade,
+                                    maxLines: 1,
+                                    softWrap: false,
+                                    style: TextStyle(fontSize: 20),
+                                  ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Text(
+                                    'price : ${catProducts[index].sellPrice.toString()} \$',
+                                    style: TextStyle(fontSize: 15),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
+                    ),
+                  );
+                },
               ),
-            );
-          })))
+            ),
+          ),
         ],
       ),
     );

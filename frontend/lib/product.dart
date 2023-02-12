@@ -3,32 +3,36 @@ import 'package:flutter/cupertino.dart';
 class Product {
   late int ID;
   late String name;
-  late String vendor;
-  late int price;
+  late String publisher;
+  late int sellPrice;
   late int buyPrice;
+  late int discountedPrice;
   late String discription;
   late String imageURL;
   late String gameReleaseDate;
   late int orderID;
+  late int stock;
   late int status;
   late int categoryCode;
 
   Product.product(
     this.ID,
     this.name,
-    this.vendor,
-    this.price,
+    this.publisher,
+    this.sellPrice,
     this.buyPrice,
+    this.discountedPrice,
     this.discription,
     this.imageURL,
     this.gameReleaseDate,
+    this.stock,
     this.categoryCode,
   );
   Product.productAsOrder(
       this.ID,
       this.name,
-      this.vendor,
-      this.price,
+      this.publisher,
+      this.sellPrice,
       this.buyPrice,
       this.discription,
       this.imageURL,
@@ -39,7 +43,7 @@ class Product {
   Product.full(
     this.name,
     this.imageURL,
-    this.price,
+    this.sellPrice,
     this.ID,
     this.categoryCode,
     this.gameReleaseDate,

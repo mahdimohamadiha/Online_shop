@@ -52,9 +52,9 @@ class _NewProductPageState extends State<NewProductPage> {
     isEdit = true;
     product = p;
     nameCon = TextEditingController(text: product.name);
-    vendorCon = TextEditingController(text: product.vendor);
+    vendorCon = TextEditingController(text: product.publisher);
     buyPriceCon = TextEditingController(text: product.buyPrice.toString());
-    sellPriceCon = TextEditingController(text: product.price.toString());
+    sellPriceCon = TextEditingController(text: product.sellPrice.toString());
     descriptionCon = TextEditingController(text: product.discription);
     imageUrlCon = TextEditingController(text: product.imageURL);
     gameReleaseDateCon = TextEditingController(text: product.gameReleaseDate);

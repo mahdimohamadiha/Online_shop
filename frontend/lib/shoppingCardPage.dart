@@ -108,7 +108,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                                     height: 10,
                                   ),
                                   Text(
-                                    'price : ${orders[index].price.toString()} \$',
+                                    'price : ${orders[index].sellPrice.toString()} \$',
                                     style: TextStyle(fontSize: 15),
                                   ),
                                   SizedBox(

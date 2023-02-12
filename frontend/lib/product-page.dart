@@ -28,6 +28,7 @@ class _ProductPageState extends State<ProductPage> {
   }
 
   bool isHover = false;
+  bool notif = false;
 
   final snackBarError = const SnackBar(
       content: Text('you have to login first'),
@@ -59,7 +60,7 @@ class _ProductPageState extends State<ProductPage> {
           color: Colors.green,
         ),
       ));
-
+  List comments = ['amir', 'ali'];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,7 +108,7 @@ class _ProductPageState extends State<ProductPage> {
                                 children: [
                                   Padding(
                                     padding: EdgeInsets.symmetric(
-                                        vertical: 30, horizontal: 20),
+                                        vertical: 20, horizontal: 20),
                                     child: Text(
                                       'Product Name :  ${product.name}',
                                       style: TextStyle(
@@ -117,9 +118,20 @@ class _ProductPageState extends State<ProductPage> {
                                   ),
                                   Padding(
                                     padding: EdgeInsets.symmetric(
+                                        vertical: 5, horizontal: 20),
+                                    child: Text(
+                                      'Release : ${product.gameReleaseDate.substring(0, 4)}',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(
                                         vertical: 0, horizontal: 20),
                                     child: Text(
-                                      'Price : ${product.price.toString()}',
+                                      'from : ${product.publisher}',
                                       style: TextStyle(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
@@ -143,10 +155,62 @@ class _ProductPageState extends State<ProductPage> {
                             )
                           ],
                         ),
+                        Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Discription :',
+                                style: TextStyle(
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Text(
+                                product.discription,
+                                style: TextStyle(
+                                  fontSize: 20,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
                 ),
+                // ListView.builder(
+                //     itemCount: 5,
+                //     itemBuilder: (BuildContext context, int index) {
+                //       return ListTile(
+                //           leading: const Icon(Icons.list),
+                //           trailing: const Text(
+                //             "GFG",
+                //             style: TextStyle(color: Colors.green, fontSize: 15),
+                //           ),
+                //           title: Text("List item $index"));
+                //     }),
+                // SliverList(
+                //   delegate: SliverChildListDelegate(
+                //     List.generate(
+                //       comments.length,
+                //       (index) {
+                //         return Padding(
+                //           padding: EdgeInsets.all(10),
+                //           child: Container(
+                //             child: Column(
+                //               children: [Text(comments[index])],
+                //             ),
+                //           ),
+                //         );
+                //       },
+                //     ),
+                //   ),
+                // )
               ],
             ),
           ),
@@ -219,8 +283,14 @@ class _ProductPageState extends State<ProductPage> {
                         ),
                         Expanded(
                           child: IconButton(
-                            onPressed: () {},
-                            icon: Icon(Icons.doorbell),
+                            onPressed: () {
+                              setState(() {
+                                notif = !notif;
+                              });
+                            },
+                            icon: notif
+                                ? Icon(Icons.notifications_none)
+                                : Icon(Icons.notifications_active),
                           ),
                         ),
                       ],
@@ -228,10 +298,15 @@ class _ProductPageState extends State<ProductPage> {
                   ),
                   Expanded(
                       child: Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: Text(
-                      'price : ${product.price} \$',
-                      style: TextStyle(fontSize: 20),
+                    padding: const EdgeInsets.only(left: 8.0, bottom: 10),
+                    child: Row(
+                      children: [
+                        Text(
+                          'price : ${product.sellPrice.toDouble()} ',
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        Icon(Icons.attach_money),
+                      ],
                     ),
                   ))
                 ],

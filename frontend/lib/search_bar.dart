@@ -39,13 +39,15 @@ class CustomSearchDelegate extends SearchDelegate {
     product = Product.product(
       id,
       decoded['productName'],
-      decoded['productVendor'],
+      decoded['productPublisher'],
       decoded['salePrice'],
       decoded['buyPrice'],
+      decoded['discountedPrice'],
       decoded['textDescription'],
       decoded['image'],
       decoded['gameReleaseDate'],
-      decoded['category'],
+      decoded['stock'],
+      decoded['categoryID'],
     );
   }
 
