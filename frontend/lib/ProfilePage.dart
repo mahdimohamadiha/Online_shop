@@ -14,8 +14,8 @@ class ProfilePage extends StatefulWidget {
   State<ProfilePage> createState() => _ProfilePageState();
   static bool logedIn = false;
   static bool isAdmin = false;
-  static User user =
-      User(0, 'email', 'fullName', 'city', 'phone', 'password', 'address');
+  static User user = User(
+      0, 'email', 'fullName', 'city', 'phone', 'password', 'address', 0, false);
 }
 
 class _ProfilePageState extends State<ProfilePage> {
@@ -59,9 +59,8 @@ class _AdminProfileState extends State<AdminProfile> {
     return Scaffold(
       backgroundColor: Colors.grey[300],
       body: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
               margin: EdgeInsets.symmetric(horizontal: 60, vertical: 20),
@@ -78,90 +77,161 @@ class _AdminProfileState extends State<AdminProfile> {
               height: 10,
             ),
             Container(
+              padding: EdgeInsets.all(20),
+              constraints: BoxConstraints(
+                minHeight: 100,
+                minWidth: MediaQuery.of(context).size.width,
+              ),
+              decoration: BoxDecoration(
+                  color: Colors.grey[400],
+                  borderRadius: BorderRadius.circular(20)),
               margin: EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        'full name :',
-                        style: _textStyle,
+                      Icon(
+                        Icons.person_outline,
+                        size: 30,
                       ),
                       SizedBox(
-                        height: 20,
+                        width: 10,
                       ),
                       Text(
-                        'Email : ',
-                        style: _textStyle,
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Text(
-                        'employee Name :  ',
+                        ProfilePage.user.fullName,
                         style: _textStyle,
                       ),
                     ],
                   ),
                   SizedBox(
-                    width: 20,
+                    height: 20,
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        ProfilePage.user.fullName,
-                        style: _textStyle,
+                      Icon(
+                        Icons.email_outlined,
+                        size: 30,
                       ),
                       SizedBox(
-                        height: 20,
+                        width: 10,
                       ),
                       Text(
                         ProfilePage.user.email,
+                        overflow: TextOverflow.fade,
+                        maxLines: 1,
+                        softWrap: false,
                         style: _textStyle,
                       ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.person,
+                        size: 30,
+                      ),
                       SizedBox(
-                        height: 20,
+                        width: 10,
                       ),
                       Text(
                         ProfilePage.user.employeeName,
                         style: _textStyle,
                       ),
                     ],
-                  )
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.manage_accounts,
+                        size: 30,
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Text(
+                        ProfilePage.user.jobTitle,
+                        style: _textStyle,
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  ProfilePage.isAdmin = false;
-                  ProfilePage.logedIn = false;
-                  _function();
-                },
-                child: const Text('logout'),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 15),
+              height: 50,
+              decoration:
+                  BoxDecoration(borderRadius: BorderRadius.circular(30)),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    ProfilePage.isAdmin = false;
+                    ProfilePage.logedIn = false;
+                    _function();
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'logout',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Icon(Icons.logout)
+                    ],
+                  ),
+                ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) {
-                        return NewProductPage(
-                          product: Product.searchList('name', 1),
-                          isEdit: false,
-                          function: () {},
-                        );
-                      },
-                    ),
-                  );
-                },
-                child: const Text('add new product'),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 15),
+              height: 50,
+              decoration:
+                  BoxDecoration(borderRadius: BorderRadius.circular(30)),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return NewProductPage(
+                            product: Product.searchList('name', 1),
+                            isEdit: false,
+                            function: () {},
+                          );
+                        },
+                      ),
+                    );
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'add new product',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Icon(Icons.add)
+                    ],
+                  ),
+                ),
               ),
             ),
           ],
@@ -188,119 +258,177 @@ class _UserprofileState extends State<Userprofile> {
     return Scaffold(
       backgroundColor: Colors.grey[300],
       body: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Column(
+        child: Stack(
           children: [
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 60, vertical: 20),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(120),
-                child: Image.asset(
-                  'asset/image/profile.png',
-                  width: 120,
-                  height: 120,
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(
+                          right: 150, left: 30, bottom: 20, top: 20),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(120),
+                        child: Image.asset(
+                          'asset/image/profile.png',
+                          width: 120,
+                          height: 120,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                          color: ProfilePage.user.specialMode
+                              ? Colors.yellow[500]
+                              : Colors.grey[500],
+                          borderRadius: BorderRadius.circular(20)),
+                      child: Row(
+                        children: [
+                          ProfilePage.user.specialMode
+                              ? Text('Special')
+                              : Text(''),
+                          Icon(Icons.star),
+                          Text(ProfilePage.user.score.toString()),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                Container(
+                  padding: EdgeInsets.all(20),
+                  constraints: BoxConstraints(
+                    minWidth: MediaQuery.of(context).size.width,
+                  ),
+                  decoration: BoxDecoration(
+                      color: Colors.grey[400],
+                      borderRadius: BorderRadius.circular(20)),
+                  margin: EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        'full name :',
-                        style: _textStyle,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.person_outlined,
+                            size: 30,
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            ProfilePage.user.fullName,
+                            style: _textStyle,
+                          ),
+                        ],
                       ),
                       SizedBox(
                         height: 20,
                       ),
-                      Text(
-                        'Email : ',
-                        style: _textStyle,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.email_outlined,
+                            size: 30,
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            ProfilePage.user.email,
+                            style: _textStyle,
+                          ),
+                        ],
                       ),
                       SizedBox(
                         height: 20,
                       ),
-                      Text(
-                        'address : ',
-                        style: _textStyle,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.location_on,
+                            size: 30,
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            ProfilePage.user.address,
+                            style: _textStyle,
+                          ),
+                        ],
                       ),
                       SizedBox(
                         height: 20,
                       ),
-                      Text(
-                        'city :',
-                        style: _textStyle,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.location_city,
+                            size: 30,
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            ProfilePage.user.city,
+                            style: _textStyle,
+                          ),
+                        ],
                       ),
                       SizedBox(
                         height: 20,
                       ),
-                      Text(
-                        'phone number :  ',
-                        style: _textStyle,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.phone_android,
+                            size: 30,
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            ProfilePage.user.phone,
+                            style: _textStyle,
+                          ),
+                        ],
                       ),
                       SizedBox(
                         height: 20,
                       ),
                     ],
                   ),
-                  SizedBox(
-                    width: 20,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(25),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _function();
+                      ProfilePage.logedIn = false;
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.logout),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Text('logout'),
+                      ],
+                    ),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        ProfilePage.user.fullName,
-                        style: _textStyle,
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Text(
-                        ProfilePage.user.email,
-                        style: _textStyle,
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Text(
-                        ProfilePage.user.address,
-                        style: _textStyle,
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Text(
-                        ProfilePage.user.city,
-                        style: _textStyle,
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Text(
-                        ProfilePage.user.phone,
-                        style: _textStyle,
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                    ],
-                  )
-                ],
-              ),
+                )
+              ],
+              crossAxisAlignment: CrossAxisAlignment.start,
             ),
-            ElevatedButton(
-              onPressed: () {
-                _function();
-                ProfilePage.logedIn = false;
-              },
-              child: const Text('logout'),
-            )
           ],
-          crossAxisAlignment: CrossAxisAlignment.start,
         ),
       ),
     );
@@ -460,13 +588,16 @@ class _LoginPageState extends State<LoginPage> {
                         }));
                     decoded = json.decode(response.body);
                     ProfilePage.user = User(
-                        userID,
-                        decoded['customerEmail'],
-                        decoded['customerFullName'],
-                        decoded['city'],
-                        decoded['phone'],
-                        decoded['password'],
-                        decoded['address']);
+                      userID,
+                      decoded['customerEmail'],
+                      decoded['customerFullName'],
+                      decoded['city'],
+                      decoded['phone'],
+                      decoded['password'],
+                      decoded['address'],
+                      decoded['score'],
+                      decoded['specialMode'],
+                    );
                     ProfilePage.logedIn = true;
                     _function();
                   } else {
