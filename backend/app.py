@@ -116,6 +116,26 @@ def productCategories(req: dict):
             "gameReleaseDate": record[4]
         })
     return products
+
+@app.post('/finalizing-order')
+def finalizingOrder(req: dict):
+    conn, cur = create_connection()
+    update_script = 'UPDATE "OnlineShop".orders SET shippedDate = %s, status = %s where orderID = %s'
+    update_value = (shippedTime() , 3, req["orderID"])
+    cur.execute(update_script, update_value)
+    conn.commit()
+    
+    return {"isFinalizingOrder": True}
+
+@app.post('/cancel-order')
+def cancelOrder(req: dict):
+    conn, cur = create_connection()
+    update_script = 'UPDATE "OnlineShop".orders SET status = %s where orderID = %s'
+    update_value = (4, req["orderID"])
+    cur.execute(update_script, update_value)
+    conn.commit()
+    
+    return {"isCancelOrder": True}
     
 @app.post('/login-expert')
 def loginExpert(req: dict):
@@ -208,11 +228,11 @@ def getProduct(req: dict):
 def getProductOrder(req: dict):
     products =[]
     conn, cur = create_connection()
-    cur.execute('''select p.productid ,p.productname ,p.productvendor ,p.buyprice ,p.saleprice , p.textdescription ,p.image ,p.gamereleasedate ,category ,o.customerid ,o.orderid 
+    cur.execute('''select p.productid ,p.productname ,p.productvendor ,p.buyprice ,p.saleprice , p.textdescription ,p.image ,p.gamereleasedate ,category ,o.customerid ,o.orderid, o.status
                 from "OnlineShop".orders o join "OnlineShop".products p 
                 on o.orderid = p.orderid ''')
     for record in cur.fetchall():
-        if record[8] == req["customerID"]:
+        if record[9] == req["customerID"]:
             products.append({
                         "productID": record[0],
                         "productName": record[1],
@@ -223,7 +243,8 @@ def getProductOrder(req: dict):
                         "image": record[6],
                         "gameReleaseDate": record[7],
                         "category": record[8],
-                        "orderID": record[10]})     
+                        "orderID": record[10],
+                        "status": record[11]})     
             
     return products
 
