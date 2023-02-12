@@ -31,7 +31,7 @@ def login(req: dict):
         conn, cur = create_connection()
         cur.execute('SELECT * FROM "OnlineShop".customers')
         for record in cur.fetchall():
-            if record[5] == req["customerEmail"] and record[6] == req["password"]:
+            if record[7] == req["customerEmail"] and record[8] == req["password"]:
                 return {"customerID": record[0]}
         return {"customerID": 0}
 
@@ -47,11 +47,11 @@ def signup(req: dict):
         else:
             if record[0] >= id:
                 id = record[0] + 1
-        if record[5] == req["customerEmail"]:
+        if record[7] == req["customerEmail"]:
             return {"isExistEmail": True}
             
-    insert_script = 'INSERT INTO "OnlineShop".customers (customerID, customerFullName, phone, city, address, customerEmail, password, expertID) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'
-    insert_value = (id ,req["customerFullName"], req["phone"], req["city"], req["address"], req["customerEmail"], req["password"], 1)
+    insert_script = 'INSERT INTO "OnlineShop".customers (customerID, customerFullName, phone, city, address, score, specialMode, customerEmail, password, expertID) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+    insert_value = (id ,req["customerFullName"], req["phone"], req["city"], req["address"], 0, True, req["customerEmail"], req["password"], 1)
     cur.execute(insert_script, insert_value)
     conn.commit()
     
@@ -136,6 +136,38 @@ def cancelOrder(req: dict):
     conn.commit()
     
     return {"isCancelOrder": True}
+
+@app.post('/registration-satisfaction')
+def registrationSatisfaction(req: dict):
+    conn, cur = create_connection()
+    update_script = 'UPDATE "OnlineShop".orders SET satisfaction = %s where orderID = %s'
+    update_value = (req["satisfaction"], req["orderID"])
+    cur.execute(update_script, update_value)
+    conn.commit()
+    
+    return {"isRegistrationSatisfaction": True}
+
+@app.post('/add-product-notices')
+def addProductNotices(req: dict):
+    conn, cur = create_connection()
+    insert_script = 'insert into "OnlineShop".notices (productID, customerID) values (%s, %s)'
+    insert_value = (req["productID"], req["customerID"])
+    cur.execute(insert_script, insert_value)
+    conn.commit()
+    
+@app.post('/delete-product-notices')
+def deleteProductNotices(req: dict):
+    conn, cur = create_connection()
+    delete_script = 'delete from "OnlineShop".notices where productid = %s and customerid = %s'
+    delete_value = (req["productID"], req["customerID"])
+    cur.execute(delete_script, delete_value)
+    conn.commit()
+    
+    
+@app.post('/product-notices')  
+def productNotices(req: dict): 
+    conn, cur = create_connection() 
+    
     
 @app.post('/login-expert')
 def loginExpert(req: dict):
@@ -272,9 +304,11 @@ def getCustomer(req: dict):
                        "phone": record[2],
                        "city": record[3],
                        "address": record[4],
-                       "customerEmail": record[5],
-                       "password": record[6],
-                       "expertID": record[7]}
+                       "score": record[5],
+                       "specialMode": record[6],
+                       "customerEmail": record[7],
+                       "password": record[8],
+                       "expertID": record[9]}
             
     return customer
 
