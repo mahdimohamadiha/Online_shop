@@ -51,7 +51,7 @@ def signup(req: dict):
             return {"isExistEmail": True}
             
     insert_script = 'INSERT INTO "OnlineShop".customers (customerID, customerFullName, phone, city, address, score, specialMode, customerEmail, password, expertID) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
-    insert_value = (id ,req["customerFullName"], req["phone"], req["city"], req["address"], 0, True, req["customerEmail"], req["password"], 1)
+    insert_value = (id ,req["customerFullName"], req["phone"], req["city"], req["address"], 0, False, req["customerEmail"], req["password"], 1)
     cur.execute(insert_script, insert_value)
     conn.commit()
     
@@ -231,10 +231,11 @@ def getSortProductRelease():
         sort_product.append({"productID": record[0],
                         "productName": record[1],
                         "salePrice": record[4],
-                        "image": record[6],
-                        "gameReleaseDate": record[7],
-                        "category": record[8]})
-    sort_product.sort(key=lambda sort_product: sort_product["gameReleaseDate"])    
+                        "discountedPrice": record[5],
+                        "image": record[7],
+                        "gameReleaseDate": record[8],
+                        "category": record[10]})
+    sort_product.sort(key=lambda sort_product: sort_product["gameReleaseDate"], reverse=True)    
     return sort_product
 
 
@@ -248,10 +249,12 @@ def getProduct(req: dict):
                        "productVendor": record[2],
                        "buyPrice": record[3],
                        "salePrice": record[4],
-                       "textDescription": record[5],
-                       "image": record[6],
-                       "gameReleaseDate": record[7],
-                       "category": record[8]}
+                       "discountedPrice": record[5],
+                       "textDescription": record[6],
+                       "image": record[7],
+                       "gameReleaseDate": record[8],
+                       "stock": record[9],
+                       "category": record[10]}
             
     return product
 
