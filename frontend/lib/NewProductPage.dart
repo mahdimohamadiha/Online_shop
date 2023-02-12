@@ -34,12 +34,14 @@ class _NewProductPageState extends State<NewProductPage> {
   late String _title = 'new product';
   bool isEdit = false;
   TextEditingController nameCon = TextEditingController();
-  TextEditingController vendorCon = TextEditingController();
+  TextEditingController publisherCon = TextEditingController();
   TextEditingController buyPriceCon = TextEditingController();
   TextEditingController sellPriceCon = TextEditingController();
+  TextEditingController discountCon = TextEditingController();
   TextEditingController descriptionCon = TextEditingController();
   TextEditingController imageUrlCon = TextEditingController();
   TextEditingController gameReleaseDateCon = TextEditingController();
+  TextEditingController stockCon = TextEditingController();
   TextEditingController categoryCon = TextEditingController();
 
   _NewProductPageState.addNew() {
@@ -52,12 +54,15 @@ class _NewProductPageState extends State<NewProductPage> {
     isEdit = true;
     product = p;
     nameCon = TextEditingController(text: product.name);
-    vendorCon = TextEditingController(text: product.publisher);
+    publisherCon = TextEditingController(text: product.publisher);
     buyPriceCon = TextEditingController(text: product.buyPrice.toString());
     sellPriceCon = TextEditingController(text: product.sellPrice.toString());
+    discountCon =
+        TextEditingController(text: product.discountedPrice.toString());
     descriptionCon = TextEditingController(text: product.discription);
     imageUrlCon = TextEditingController(text: product.imageURL);
     gameReleaseDateCon = TextEditingController(text: product.gameReleaseDate);
+    stockCon = TextEditingController(text: product.stock.toString());
     categoryCon = TextEditingController(
         text: homePage.categories[product.categoryCode - 1].name);
     homePage.categories.forEach((element) {
@@ -78,12 +83,14 @@ class _NewProductPageState extends State<NewProductPage> {
 
   void empty() {
     if (nameCon.text.isNotEmpty &&
-        vendorCon.text.isNotEmpty &&
+        publisherCon.text.isNotEmpty &&
         buyPriceCon.text.isNotEmpty &&
         sellPriceCon.text.isNotEmpty &&
+        discountCon.text.isNotEmpty &&
         descriptionCon.text.isNotEmpty &&
         imageUrlCon.text.isNotEmpty &&
         categoryCon.text.isNotEmpty &&
+        stockCon.text.isNotEmpty &&
         gameReleaseDateCon.text.isNotEmpty) {
       isEmpty = false;
     } else {
@@ -147,12 +154,13 @@ class _NewProductPageState extends State<NewProductPage> {
                 height: 20,
               ),
               TextField(
-                controller: vendorCon,
+                controller: publisherCon,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
-                  errorText: firstTime ? null : errorHandeler(vendorCon.text),
-                  labelText: 'Product Vendor',
-                  hintText: 'Vendor',
+                  errorText:
+                      firstTime ? null : errorHandeler(publisherCon.text),
+                  labelText: 'Product publisher',
+                  hintText: 'publisher',
                   contentPadding: EdgeInsets.all(20),
                 ),
               ),
@@ -166,7 +174,8 @@ class _NewProductPageState extends State<NewProductPage> {
                       controller: buyPriceCon,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
-                        labelText: 'Product Buy Price',
+                        labelText: ' Buy ',
+                        suffixIcon: Icon(Icons.attach_money_outlined),
                         errorText:
                             firstTime ? null : errorHandeler(buyPriceCon.text),
                         hintText: 'buy',
@@ -182,14 +191,32 @@ class _NewProductPageState extends State<NewProductPage> {
                       controller: sellPriceCon,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
-                        labelText: 'Product sell Price',
+                        labelText: 'sell',
+                        suffixIcon: Icon(Icons.attach_money_outlined),
                         errorText:
                             firstTime ? null : errorHandeler(sellPriceCon.text),
                         hintText: 'sell',
                         contentPadding: EdgeInsets.all(20),
                       ),
                     ),
-                  )
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    child: TextField(
+                      controller: discountCon,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'discount',
+                        suffixIcon: Icon(Icons.discount),
+                        errorText:
+                            firstTime ? null : errorHandeler(discountCon.text),
+                        hintText: 'discount',
+                        contentPadding: EdgeInsets.all(20),
+                      ),
+                    ),
+                  ),
                 ],
               ),
               SizedBox(
@@ -266,10 +293,11 @@ class _NewProductPageState extends State<NewProductPage> {
                     borderRadius: BorderRadius.all(Radius.circular(10))),
               ),
               Padding(
-                padding: const EdgeInsets.all(24.0),
+                padding: const EdgeInsets.all(10),
                 child: Row(
                   children: <Widget>[
                     Expanded(
+                      flex: 7,
                       child: TextField(
                         controller: categoryCon,
                         focusNode: AlwaysDisabledFocusNode(),
@@ -286,7 +314,7 @@ class _NewProductPageState extends State<NewProductPage> {
                                   ),
                                   color: Colors.black,
                                 ),
-                          labelText: 'Product category',
+                          labelText: 'category',
                           contentPadding: EdgeInsets.all(20),
                         ),
                       ),
@@ -310,6 +338,54 @@ class _NewProductPageState extends State<NewProductPage> {
                         }).toList();
                       },
                     ),
+                    Expanded(
+                      flex: 4,
+                      child: TextField(
+                        onChanged: (text) {
+                          setState(() {});
+                        },
+                        controller: stockCon,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'stock',
+                          errorText:
+                              firstTime ? null : errorHandeler(stockCon.text),
+                          hintText: 'stock',
+                          contentPadding: EdgeInsets.all(20),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 4,
+                      child: Column(
+                        children: [
+                          TextButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  int temp = int.parse(stockCon.text) + 1;
+                                  stockCon.text = temp.toString();
+                                });
+                              },
+                              icon: Icon(Icons.keyboard_arrow_up_rounded),
+                              style: TextButton.styleFrom(
+                                minimumSize: Size(5, 5),
+                              ),
+                              label: Text('')),
+                          TextButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  int temp = int.parse(stockCon.text) - 1;
+                                  stockCon.text = temp.toString();
+                                });
+                              },
+                              style: TextButton.styleFrom(
+                                minimumSize: Size(5, 5),
+                              ),
+                              icon: Icon(Icons.keyboard_arrow_down_rounded),
+                              label: Text(''))
+                        ],
+                      ),
+                    )
                   ],
                 ),
               ),
@@ -366,14 +442,17 @@ class _NewProductPageState extends State<NewProductPage> {
                                     body: json.encode({
                                       "productID": product.ID,
                                       "productName": nameCon.text,
-                                      "productVendor": vendorCon.text,
+                                      "productPublisher": publisherCon.text,
                                       "buyPrice": int.parse(buyPriceCon.text),
                                       "salePrice": int.parse(sellPriceCon.text),
+                                      "discountedPrice":
+                                          int.parse(discountCon.text),
                                       "textDescription": descriptionCon.text,
                                       "image": imageUrlCon.text,
                                       "gameReleaseDate":
                                           gameReleaseDateCon.text,
-                                      "category": _categorie.code
+                                      "stock": int.parse(stockCon.text),
+                                      "categoryID": _categorie.code,
                                     }));
                                 var decoded = json.decode(response.body);
 
@@ -405,14 +484,17 @@ class _NewProductPageState extends State<NewProductPage> {
                                     headers: headers,
                                     body: json.encode({
                                       "productName": nameCon.text,
-                                      "productVendor": vendorCon.text,
+                                      "productPublisher": publisherCon.text,
                                       "buyPrice": int.parse(buyPriceCon.text),
                                       "salePrice": int.parse(sellPriceCon.text),
+                                      "discountedPrice":
+                                          int.parse(discountCon.text),
                                       "textDescription": descriptionCon.text,
                                       "image": imageUrlCon.text,
                                       "gameReleaseDate":
                                           gameReleaseDateCon.text,
-                                      "category": _categorie.code
+                                      "stock": int.parse(stockCon.text),
+                                      "category": _categorie.code,
                                     }));
                                 var decoded = json.decode(response.body);
 
@@ -432,7 +514,7 @@ class _NewProductPageState extends State<NewProductPage> {
                     child: TextButton(
                       onPressed: () {
                         nameCon.text = '';
-                        vendorCon.text = '';
+                        publisherCon.text = '';
                         sellPriceCon.text = '';
                         buyPriceCon.text = '';
                         descriptionCon.text = '';
