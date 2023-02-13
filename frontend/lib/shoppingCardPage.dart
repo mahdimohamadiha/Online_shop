@@ -24,8 +24,19 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
 
   _ShoppingCartPageState(this._functiongoToLoginPage);
 
+  final snackBarSuccess = const SnackBar(
+      content: Text('order successfully submitted'),
+      backgroundColor: Colors.greenAccent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+            topRight: Radius.circular(10), topLeft: Radius.circular(10)),
+        side: BorderSide(
+          color: Colors.green,
+        ),
+      ));
+
   Future<void> getOrdersAPI() async {
-    final Uri url = Uri.parse("${MyApp.url}/get-product-order");
+    final Uri url = Uri.parse("${MyApp.url}/get-prodect-basket");
     final headers = {'Content-Type': 'application/json'};
     final response = await http.post(url,
         headers: headers,
@@ -33,31 +44,37 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
           "customerID": ProfilePage.user.id,
         }));
     List<dynamic> decoded = json.decode(response.body);
+    orders = [];
     print(decoded);
     setState(() {
       if (decoded.isNotEmpty) {
         for (int i = 0; i < decoded.length; i++) {
-          Product product = Product.productAsOrder(
+          Product product = Product.shoppingCart(
             decoded[i]['productID'],
             decoded[i]['productName'],
-            decoded[i]['productVendor'],
-            decoded[i]['salePrice'],
-            decoded[i]['buyPrice'],
-            decoded[i]['textDescription'],
             decoded[i]['image'],
-            decoded[i]['gameReleaseDate'],
-            decoded[i]['orderID'],
-            decoded[i]['status'],
+            decoded[i]['salePrice'],
+            decoded[i]['discountedPrice'],
           );
           orders.add(product);
           print(orders);
         }
       }
+      orders.forEach((element) {
+        sumOfPrices += element.sellPrice;
+      });
+      orders.forEach((element) {
+        sumOfDiscountPrices += element.sellPrice.toDouble() -
+            (element.sellPrice.toDouble() *
+                element.discountedPrice.toDouble() /
+                100);
+      });
     });
   }
 
   List<Product> orders = [];
-
+  double sumOfPrices = 0;
+  double sumOfDiscountPrices = 0;
   @override
   void initState() {
     // TODO: implement initState
@@ -70,240 +87,245 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
     return ProfilePage.logedIn
         ? orders.isEmpty
             ? Text('your shopping cart is empty')
-            : CustomScrollView(
-                slivers: [
-                  SliverList(
-                      delegate: SliverChildListDelegate(
-                          List.generate(orders.length, (index) {
-                    return Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Image.network(
-                                orders[index].imageURL,
-                                width: 100,
-                                height: 100,
-                              ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    orders[index].name,
-                                    overflow: TextOverflow.fade,
-                                    maxLines: 1,
-                                    softWrap: false,
-                                    style: TextStyle(fontSize: 20),
+            : Scaffold(
+                body: SafeArea(
+                  child: CustomScrollView(
+                    slivers: [
+                      SliverList(
+                        delegate: SliverChildListDelegate(
+                          List.generate(
+                            orders.length,
+                            (index) {
+                              return Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey,
+                                    borderRadius: BorderRadius.circular(20),
                                   ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  Text(
-                                    'price : ${orders[index].sellPrice.toString()} \$',
-                                    style: TextStyle(fontSize: 15),
-                                  ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  if (orders[index].status == 1)
-                                    Text(
-                                      'waiting for expert to confirm',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        color: Colors.yellow,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Image.network(
+                                          orders[index].imageURL,
+                                          width: 100,
+                                          height: 100,
+                                        ),
                                       ),
-                                    )
-                                  else if (orders[index].status == 2)
-                                    Text(
-                                      'you can pay now',
-                                      style: TextStyle(
-                                          fontSize: 15, color: Colors.green),
-                                    ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              orders[index].name,
+                                              overflow: TextOverflow.fade,
+                                              maxLines: 1,
+                                              softWrap: false,
+                                              style: TextStyle(fontSize: 20),
+                                            ),
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            RichText(
+                                              text: TextSpan(
+                                                text: 'price :',
+                                                style: TextStyle(
+                                                  fontSize: 20,
+                                                  color: Colors.black,
+                                                ),
+                                                children: <TextSpan>[
+                                                  TextSpan(
+                                                    text:
+                                                        '\$${orders[index].sellPrice.toDouble()}',
+                                                    style: const TextStyle(
+                                                      fontSize: 20,
+                                                      color: Colors.black,
+                                                      decoration: TextDecoration
+                                                          .lineThrough,
+                                                    ),
+                                                  ),
+                                                  TextSpan(
+                                                    text:
+                                                        ' ${orders[index].discountedPrice}% ',
+                                                    style: const TextStyle(
+                                                      color: Colors.black,
+                                                      fontSize: 15,
+                                                    ),
+                                                  ),
+                                                  TextSpan(
+                                                    text:
+                                                        ' \$${orders[index].sellPrice.toDouble() - (orders[index].sellPrice.toDouble() * orders[index].discountedPrice.toDouble() / 100)} ',
+                                                    style: const TextStyle(
+                                                      color: Colors.black,
+                                                      fontSize: 20,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(6.0),
+                                        child: TextButton(
+                                          style: TextButton.styleFrom(
+                                            backgroundColor: Colors.red,
+                                            minimumSize: Size(20, 120),
+                                          ),
+                                          child: const Icon(
+                                            Icons.delete_outline,
+                                            color: Colors.black,
+                                          ),
+                                          onPressed: () async {
+                                            final Uri url = Uri.parse(
+                                                "${MyApp.url}/delete-peoduct-basket");
+                                            final headers = {
+                                              'Content-Type': 'application/json'
+                                            };
+                                            final response =
+                                                await http.post(url,
+                                                    headers: headers,
+                                                    body: json.encode({
+                                                      "customerid":
+                                                          ProfilePage.user.id,
+                                                      "productid":
+                                                          orders[index].ID,
+                                                    }));
+                                            var decoded =
+                                                json.decode(response.body);
+                                            if (decoded[
+                                                'isdeleteProductBasket']) {
+                                              setState(() {
+                                                print(orders[index].name);
+                                                getOrdersAPI();
+                                              });
+                                            }
+                                          },
+                                        ),
+                                      )
+                                    ],
+                                  ),
                                 ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: TextButton(
-                                        style: TextButton.styleFrom(
-                                          backgroundColor: Colors.blueGrey,
-                                          minimumSize: Size(1, 1),
-                                        ),
-                                        child: Icon(
-                                          orders[index].status == 2
-                                              ? Icons.attach_money
-                                              : Icons.money_off,
-                                          color: Colors.black,
-                                        ),
-                                        onPressed: orders[index].status == 2
-                                            ? () {
-                                                setState(() {});
-                                              }
-                                            : null,
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding:
-                                          const EdgeInsets.only(right: 8.0),
-                                      child: TextButton(
-                                        style: TextButton.styleFrom(
-                                          backgroundColor: Colors.red,
-                                          minimumSize: Size(1, 1),
-                                        ),
-                                        child: const Icon(
-                                          Icons.delete_outline,
-                                          color: Colors.black,
-                                        ),
-                                        onPressed: () {
-                                          setState(() {});
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            )
-                          ],
+                              );
+                            },
+                          ),
                         ),
                       ),
-                    );
-                  }))),
-                  // Padding(
-                  //   padding: const EdgeInsets.only(top: 10.0, left: 10),
-                  //   child: SizedBox(
-                  //     height: MediaQuery.of(context).size.height - 200,
-                  //     child: GridView.builder(
-                  //       physics: const AlwaysScrollableScrollPhysics(),
-                  //       itemCount: orders.length,
-                  //       scrollDirection: Axis.vertical,
-                  //       itemBuilder: (context, index) {
-                  //         var result = orders[index];
-                  //         return Padding(
-                  //           padding: const EdgeInsets.all(8.0),
-                  //           child: Container(
-                  //             width: 150,
-                  //             alignment: Alignment.center,
-                  //             child: Stack(
-                  //               children: [
-                  //                 ElevatedButton(
-                  //                   style: ElevatedButton.styleFrom(
-                  //                       minimumSize: Size(150, 1)),
-                  //                   onPressed: () {
-                  //                     print(result.name);
-                  //
-                  //                     Navigator.push(
-                  //                       context,
-                  //                       MaterialPageRoute(
-                  //                         builder: (context) {
-                  //                           return ProductPage(
-                  //                               product: orders[index]);
-                  //                         },
-                  //                       ),
-                  //                     );
-                  //                   },
-                  //                   child: Column(
-                  //                     mainAxisAlignment:
-                  //                         MainAxisAlignment.center,
-                  //                     children: [
-                  //                       Image.network(result.imageURL,
-                  //                           width: 100,
-                  //                           height: 100,
-                  //                           fit: BoxFit.contain),
-                  //                       Text(result.name,
-                  //                           overflow: TextOverflow.fade,
-                  //                           maxLines: 1,
-                  //                           softWrap: false,
-                  //                           style: TextStyle(fontSize: 20)),
-                  //                       Text(result.price.toString()),
-                  //                     ],
-                  //                   ),
-                  //                 ),
-                  //                 Positioned(
-                  //                   bottom: 0,
-                  //                   right: 0,
-                  //                   child: TextButton(
-                  //                     style: TextButton.styleFrom(
-                  //                       minimumSize: Size(1, 1),
-                  //                       backgroundColor: Colors.red,
-                  //                     ),
-                  //                     child: const Icon(
-                  //                       Icons.delete_outline,
-                  //                       size: 15,
-                  //                       color: Colors.black,
-                  //                     ),
-                  //                     onPressed: () {
-                  //                       setState(() {
-                  //                         orders.removeAt(index);
-                  //                       });
-                  //                     },
-                  //                   ),
-                  //                 )
-                  //               ],
-                  //             ),
-                  //           ),
-                  //         );
-                  //       },
-                  //       gridDelegate:
-                  //           const SliverGridDelegateWithMaxCrossAxisExtent(
-                  //               maxCrossAxisExtent: 200,
-                  //               childAspectRatio: 1,
-                  //               crossAxisSpacing: 20,
-                  //               mainAxisSpacing: 20),
-                  //     ),
-                  //   ),
-                  // ),
-                  // Expanded(
-                  //   child: Padding(
-                  //     padding: const EdgeInsets.all(8.0),
-                  //     child: Row(
-                  //       children: [
-                  //         Expanded(
-                  //           child: ElevatedButton(
-                  //               onPressed: () {
-                  //                 print('pardakht');
-                  //               },
-                  //               child: const Text('pay')),
-                  //           flex: 5,
-                  //         ),
-                  //         Expanded(
-                  //           flex: 3,
-                  //           child: TextButton.icon(
-                  //             onPressed: () {
-                  //               setState(() {
-                  //                 ProfilePage.user.orders = [];
-                  //                 orders = [];
-                  //               });
-                  //             },
-                  //             icon: const Icon(Icons.delete_outline,
-                  //                 color: Colors.red),
-                  //             label: const Text(
-                  //               'delete all',
-                  //               style: TextStyle(color: Colors.red),
-                  //             ),
-                  //           ),
-                  //         )
-                  //       ],
-                  //     ),
-                  //   ),
-                  // )
-                ],
+                    ],
+                  ),
+                ),
+                bottomNavigationBar: Container(
+                  height: 90,
+                  color: Colors.grey[300],
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: RichText(
+                            text: TextSpan(
+                              text: 'price :',
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: Colors.black,
+                              ),
+                              children: <TextSpan>[
+                                TextSpan(
+                                  text: '\$${sumOfPrices}',
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    color: Colors.black,
+                                    decoration: TextDecoration.lineThrough,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text:
+                                      ' ${100 - ((sumOfDiscountPrices * 100) / sumOfPrices)} % ',
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: ' $sumOfDiscountPrices ',
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 20,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton(
+                                    onPressed: () async {
+                                      final Uri url = Uri.parse(
+                                          "${MyApp.url}/registration-products-order");
+                                      final headers = {
+                                        'Content-Type': 'application/json'
+                                      };
+                                      final response = await http.post(url,
+                                          headers: headers,
+                                          body: json.encode({
+                                            "customerID": ProfilePage.user.id,
+                                          }));
+                                      var decoded = json.decode(response.body);
+                                      if (decoded[
+                                          'isRegistrationProductsOrder']) {
+                                        print('order added');
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(snackBarSuccess);
+                                        getOrdersAPI();
+                                      }
+                                    },
+                                    child: const Text('submit as order')),
+                                flex: 5,
+                              ),
+                              Expanded(
+                                flex: 3,
+                                child: TextButton.icon(
+                                  onPressed: () async {
+                                    final Uri url = Uri.parse(
+                                        "${MyApp.url}/delete-peoduct-basket");
+                                    final headers = {
+                                      'Content-Type': 'application/json'
+                                    };
+                                    for (Product p in orders) {
+                                      final response = await http.post(url,
+                                          headers: headers,
+                                          body: json.encode({
+                                            "customerid": ProfilePage.user.id,
+                                            "productid": p.ID
+                                          }));
+                                    }
+
+                                    setState(() {
+                                      getOrdersAPI();
+                                    });
+                                  },
+                                  icon: const Icon(Icons.delete_outline,
+                                      color: Colors.red),
+                                  label: const Text(
+                                    'delete all',
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               )
         : Container(
             padding: const EdgeInsets.all(20),
@@ -331,6 +353,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                     },
                     child: Text('Login'))
               ],
-            ));
+            ),
+          );
   }
 }

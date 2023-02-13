@@ -69,308 +69,313 @@ class _ProductPageState extends State<ProductPage> {
       appBar: AppBar(
         title: Text(product.name),
       ),
-      body: Column(
-        children: [
-          SizedBox(
-            height: MediaQuery.of(context).size.height - 180,
-            child: CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    child: Column(
-                      children: [
-                        Stack(
-                          children: [
-                            Container(
-                              color: Colors.white,
-                              height: 450,
-                            ),
-                            Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.only(
-                                    bottomLeft: Radius.circular(25),
-                                    bottomRight: Radius.circular(25)),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.5),
-                                    spreadRadius: 5,
-                                    blurRadius: 7,
-                                    offset: Offset(
-                                        0, 3), // changes position of shadow
+      body: SafeArea(
+        child: Column(
+          children: [
+            SizedBox(
+              height: MediaQuery.of(context).size.height - 180,
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      child: Column(
+                        children: [
+                          Stack(
+                            children: [
+                              Container(
+                                color: Colors.white,
+                                height: 450,
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.only(
+                                      bottomLeft: Radius.circular(25),
+                                      bottomRight: Radius.circular(25)),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.5),
+                                      spreadRadius: 5,
+                                      blurRadius: 7,
+                                      offset: Offset(
+                                          0, 3), // changes position of shadow
+                                    ),
+                                  ],
+                                  color: Colors.grey[300],
+                                ),
+                                height: 300,
+                                width: double.infinity,
+                              ),
+                              Positioned(
+                                left: 50,
+                                top: 0,
+                                child: ImageIcon(
+                                  AssetImage(
+                                    homePage
+                                        .categories[product.categoryCode - 1]
+                                        .imageURL,
+                                  ),
+                                  color: Colors.grey[500],
+                                  size: 300,
+                                ),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: 20, horizontal: 20),
+                                    child: Text(
+                                      'Product Name :  ${product.name}',
+                                      style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: 5, horizontal: 20),
+                                    child: Text(
+                                      'Release : ${product.gameReleaseDate.substring(0, 4)}',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: 0, horizontal: 20),
+                                    child: Text(
+                                      'from : ${product.publisher}',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
                                 ],
-                                color: Colors.grey[300],
                               ),
-                              height: 300,
-                              width: double.infinity,
-                            ),
-                            Positioned(
-                              left: 50,
-                              top: 0,
-                              child: ImageIcon(
-                                AssetImage(
-                                  homePage.categories[product.categoryCode - 1]
-                                      .imageURL,
+                              Positioned(
+                                top: 150,
+                                right: 10,
+                                left: 100,
+                                child: Container(
+                                  child: Image.network(
+                                    product.imageURL,
+                                    height: 300,
+                                    width: 200,
+                                  ),
                                 ),
-                                color: Colors.grey[500],
-                                size: 300,
                               ),
-                            ),
-                            Column(
+                              Positioned(
+                                left: 10,
+                                top: 200,
+                                child: ImageIcon(
+                                  AssetImage(
+                                    homePage
+                                        .categories[product.categoryCode - 1]
+                                        .imageURL,
+                                  ),
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Padding(
+                            padding: EdgeInsets.all(20),
+                            child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                Padding(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 20, horizontal: 20),
-                                  child: Text(
-                                    'Product Name :  ${product.name}',
-                                    style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold),
+                                Text(
+                                  'Discription :',
+                                  style: TextStyle(
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 5, horizontal: 20),
-                                  child: Text(
-                                    'Release : ${product.gameReleaseDate.substring(0, 4)}',
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                                SizedBox(
+                                  height: 10,
                                 ),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 0, horizontal: 20),
-                                  child: Text(
-                                    'from : ${product.publisher}',
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                Text(
+                                  product.discription,
+                                  style: TextStyle(
+                                    fontSize: 20,
                                   ),
                                 ),
                               ],
                             ),
-                            Positioned(
-                              top: 150,
-                              right: 10,
-                              left: 100,
-                              child: Container(
-                                child: Image.network(
-                                  product.imageURL,
-                                  height: 300,
-                                  width: 200,
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              left: 10,
-                              top: 200,
-                              child: ImageIcon(
-                                AssetImage(
-                                  homePage.categories[product.categoryCode - 1]
-                                      .imageURL,
-                                ),
-                                color: Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Padding(
-                          padding: EdgeInsets.all(20),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Discription :',
-                                style: TextStyle(
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Text(
-                                product.discription,
-                                style: TextStyle(
-                                  fontSize: 20,
-                                ),
-                              ),
-                            ],
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                // ListView.builder(
-                //     itemCount: 5,
-                //     itemBuilder: (BuildContext context, int index) {
-                //       return ListTile(
-                //           leading: const Icon(Icons.list),
-                //           trailing: const Text(
-                //             "GFG",
-                //             style: TextStyle(color: Colors.green, fontSize: 15),
-                //           ),
-                //           title: Text("List item $index"));
-                //     }),
-                // SliverList(
-                //   delegate: SliverChildListDelegate(
-                //     List.generate(
-                //       comments.length,
-                //       (index) {
-                //         return Padding(
-                //           padding: EdgeInsets.all(10),
-                //           child: Container(
-                //             child: Column(
-                //               children: [Text(comments[index])],
-                //             ),
-                //           ),
-                //         );
-                //       },
-                //     ),
-                //   ),
-                // )
-              ],
-            ),
-          ),
-          Expanded(
-            child: Container(
-              color: Colors.grey[200],
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 5,
-                          child: ProfilePage.isAdmin
-                              ? ElevatedButton(
-                                  child: Text("edit"),
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) {
-                                          return NewProductPage(
-                                            product: product,
-                                            isEdit: true,
-                                            function: () {
-                                              setState(() {
-                                                Navigator.pop(context);
-                                              });
-                                            },
-                                          );
-                                        },
-                                      ),
-                                    );
-                                  },
-                                )
-                              : ElevatedButton(
-                                  child: Text("add to shopping card"),
-                                  onPressed: () async {
-                                    if (ProfilePage.logedIn) {
-                                      final headers = {
-                                        'Content-Type': 'application/json'
-                                      };
-                                      Uri urlGetProduct = Uri.parse(
-                                          "${MyApp.url}/registration-products-order");
-                                      final response = await http.post(
-                                          urlGetProduct,
-                                          headers: headers,
-                                          body: json.encode({
-                                            'productID': product.ID,
-                                            'customerID': ProfilePage.user.id
-                                          }));
-                                      var decoded = json.decode(response.body);
-                                      print(decoded);
-                                      if (decoded[
-                                          'isRegistrationProductsOrder']) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(snackBarSuccess);
-                                      } else {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(snackBarError2);
-                                      }
-                                    } else {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(snackBarError);
-                                    }
-                                  },
-                                ),
-                        ),
-                        ProfilePage.isAdmin
-                            ? Container()
-                            : ProfilePage.logedIn
-                                ? Expanded(
-                                    child: IconButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          notif = !notif;
-                                        });
-                                      },
-                                      icon: notif
-                                          ? Icon(Icons.notifications_none)
-                                          : Icon(Icons.notifications_active),
-                                    ),
-                                  )
-                                : Container(),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                      child: Padding(
-                    padding: const EdgeInsets.only(left: 8.0, bottom: 10),
-                    child: Row(
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            text: 'price :',
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: Colors.black,
+                  // ListView.builder(
+                  //     itemCount: 5,
+                  //     itemBuilder: (BuildContext context, int index) {
+                  //       return ListTile(
+                  //           leading: const Icon(Icons.list),
+                  //           trailing: const Text(
+                  //             "GFG",
+                  //             style: TextStyle(color: Colors.green, fontSize: 15),
+                  //           ),
+                  //           title: Text("List item $index"));
+                  //     }),
+                  SliverList(
+                    delegate: SliverChildListDelegate(
+                      List.generate(
+                        comments.length,
+                        (index) {
+                          return Padding(
+                            padding: EdgeInsets.all(10),
+                            child: Container(
+                              child: Column(
+                                children: [Text(comments[index])],
+                              ),
                             ),
-                            children: <TextSpan>[
-                              TextSpan(
-                                text: '\$${product.sellPrice.toDouble()}',
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  color: Colors.black,
-                                  decoration: TextDecoration.lineThrough,
-                                ),
-                              ),
-                              TextSpan(
-                                text: ' ${product.discountedPrice}% ',
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              TextSpan(
-                                text:
-                                    ' \$${product.sellPrice.toDouble() - (product.sellPrice.toDouble() * product.discountedPrice.toDouble() / 100)} ',
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 20,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                          );
+                        },
+                      ),
                     ),
-                  ))
+                  )
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
+      ),
+      bottomNavigationBar: Container(
+        height: 100,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: Colors.grey[200],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 5,
+                    child: ProfilePage.isAdmin
+                        ? ElevatedButton(
+                            child: Text("edit"),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return NewProductPage(
+                                      product: product,
+                                      isEdit: true,
+                                      function: () {
+                                        setState(() {
+                                          Navigator.pop(context);
+                                        });
+                                      },
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+                          )
+                        : ElevatedButton(
+                            child: Text("add to shopping card"),
+                            onPressed: () async {
+                              if (ProfilePage.logedIn) {
+                                final headers = {
+                                  'Content-Type': 'application/json'
+                                };
+                                Uri urlGetProduct = Uri.parse(
+                                    "${MyApp.url}/add-product-basket");
+                                final response = await http.post(urlGetProduct,
+                                    headers: headers,
+                                    body: json.encode({
+                                      'productID': product.ID,
+                                      'customerID': ProfilePage.user.id
+                                    }));
+                                var decoded = json.decode(response.body);
+                                print(decoded);
+                                if (decoded['isaddProductBasket']) {
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(snackBarSuccess);
+                                } else {
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(snackBarError2);
+                                }
+                              } else {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(snackBarError);
+                              }
+                            },
+                          ),
+                  ),
+                  ProfilePage.isAdmin
+                      ? Container()
+                      : ProfilePage.logedIn
+                          ? Expanded(
+                              child: IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    notif = !notif;
+                                  });
+                                },
+                                icon: notif
+                                    ? Icon(Icons.notifications_none)
+                                    : Icon(Icons.notifications_active),
+                              ),
+                            )
+                          : Container(),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0, bottom: 10),
+                child: Row(
+                  children: [
+                    RichText(
+                      text: TextSpan(
+                        text: 'price :',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.black,
+                        ),
+                        children: <TextSpan>[
+                          TextSpan(
+                            text: '\$${product.sellPrice.toDouble()}',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              color: Colors.black,
+                              decoration: TextDecoration.lineThrough,
+                            ),
+                          ),
+                          TextSpan(
+                            text: ' ${product.discountedPrice}% ',
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 15,
+                            ),
+                          ),
+                          TextSpan(
+                            text:
+                                ' \$${product.sellPrice.toDouble() - (product.sellPrice.toDouble() * product.discountedPrice.toDouble() / 100)} ',
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

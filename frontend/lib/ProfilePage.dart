@@ -663,9 +663,14 @@ class _LoginPageState extends State<LoginPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) {
-                      return SignUp(
-                        changeLogedIn: _function,
-                      );
+                      return SignUp(changeLogedIn: () {
+                        setState(() {
+                          emailController.text = ProfilePage.user.email;
+                          passwordController.text = ProfilePage.user.password;
+                          print(ProfilePage.user);
+                          _function();
+                        });
+                      });
                     },
                   ),
                 );
@@ -882,6 +887,9 @@ class _SignUpState extends State<SignUp> {
                   setState(() {
                     firstTime = false;
                     if (!decoded["isExistEmail"] && !isEmpty) {
+                      ProfilePage.user.email = usernameController.text;
+                      ProfilePage.user.password = passwordController.text;
+                      functionChangeLogedIn();
                       ScaffoldMessenger.of(context)
                           .showSnackBar(snackBarSuccess);
                       Navigator.pop(context);

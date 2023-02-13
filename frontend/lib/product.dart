@@ -49,6 +49,8 @@ class Product {
     this.categoryCode,
     this.gameReleaseDate,
   );
+  Product.shoppingCart(
+      this.ID, this.name, this.imageURL, this.sellPrice, this.discountedPrice);
   Product.searchList(
     this.name,
     this.ID,
