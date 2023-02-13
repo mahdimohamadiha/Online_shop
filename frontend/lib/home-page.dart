@@ -59,7 +59,7 @@ class _homePageState extends State<homePage> {
     final response = await http.post(
       url,
       headers: headers,
-      body: json.encode({"category": homePage.catCode}),
+      body: json.encode({"categoryid": homePage.catCode}),
     );
     List<dynamic> decoded = json.decode(response.body);
     catProducts = [];

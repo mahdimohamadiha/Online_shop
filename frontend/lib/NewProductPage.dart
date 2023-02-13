@@ -41,7 +41,7 @@ class _NewProductPageState extends State<NewProductPage> {
   TextEditingController descriptionCon = TextEditingController();
   TextEditingController imageUrlCon = TextEditingController();
   TextEditingController gameReleaseDateCon = TextEditingController();
-  TextEditingController stockCon = TextEditingController();
+  TextEditingController stockCon = TextEditingController(text: 0.toString());
   TextEditingController categoryCon = TextEditingController();
 
   _NewProductPageState.addNew() {
@@ -341,6 +341,7 @@ class _NewProductPageState extends State<NewProductPage> {
                     Expanded(
                       flex: 4,
                       child: TextField(
+                        focusNode: AlwaysDisabledFocusNode(),
                         onChanged: (text) {
                           setState(() {});
                         },
@@ -374,8 +375,10 @@ class _NewProductPageState extends State<NewProductPage> {
                           TextButton.icon(
                               onPressed: () {
                                 setState(() {
-                                  int temp = int.parse(stockCon.text) - 1;
-                                  stockCon.text = temp.toString();
+                                  if (int.parse(stockCon.text) > 0) {
+                                    int temp = int.parse(stockCon.text) - 1;
+                                    stockCon.text = temp.toString();
+                                  }
                                 });
                               },
                               style: TextButton.styleFrom(
@@ -494,7 +497,7 @@ class _NewProductPageState extends State<NewProductPage> {
                                       "gameReleaseDate":
                                           gameReleaseDateCon.text,
                                       "stock": int.parse(stockCon.text),
-                                      "category": _categorie.code,
+                                      "categoryID": _categorie.code,
                                     }));
                                 var decoded = json.decode(response.body);
 
@@ -517,9 +520,11 @@ class _NewProductPageState extends State<NewProductPage> {
                         publisherCon.text = '';
                         sellPriceCon.text = '';
                         buyPriceCon.text = '';
+                        discountCon.text = '';
                         descriptionCon.text = '';
                         imageUrlCon.text = '';
                         gameReleaseDateCon.text = '';
+                        stockCon.text = 0.toString();
                         categoryCon.text = '';
                         setState(() {
                           _categorie = Categories.full('', '', 0);

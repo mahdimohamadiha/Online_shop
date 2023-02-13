@@ -3,7 +3,7 @@ import 'package:online_shop/user.dart';
 import 'package:online_shop/home-page.dart';
 import 'package:online_shop/product.dart';
 import 'package:online_shop/search_bar.dart';
-import 'package:online_shop/shoppingCardPage.dart';
+import 'package:online_shop/shoppingCartPage.dart';
 
 import 'ProfilePage.dart';
 

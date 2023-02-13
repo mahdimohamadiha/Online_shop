@@ -45,7 +45,6 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
         }));
     List<dynamic> decoded = json.decode(response.body);
     orders = [];
-    print(decoded);
     setState(() {
       if (decoded.isNotEmpty) {
         for (int i = 0; i < decoded.length; i++) {
@@ -57,7 +56,6 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
             decoded[i]['discountedPrice'],
           );
           orders.add(product);
-          print(orders);
         }
       }
       orders.forEach((element) {
@@ -200,7 +198,6 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                                             if (decoded[
                                                 'isdeleteProductBasket']) {
                                               setState(() {
-                                                print(orders[index].name);
                                                 getOrdersAPI();
                                               });
                                             }
