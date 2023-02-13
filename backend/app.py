@@ -107,81 +107,24 @@ def registrationProductsOrder(req: dict):
     insert_value = (str(req["customerID"]))
     cur.execute(insert_script, insert_value)
     conn.commit() 
-                 
-    
-    
-    # cur.execute('select * from "OnlineShop".orders')
-    # for record2 in cur.fetchall():
-    #     if record2[0] >= id:
-    #         id = record2[0] + 1
-    #     if record2[5] is None:
-    #         boole = True    
-    #         insert_script = 'insert into "OnlineShop".orderdetails (productID, orderID) values (%s, %s)'
-    #         insert_value = (req["productID"] ,record2[0])
-    #         cur.execute(insert_script, insert_value)
-    #         conn.commit()
-        # else:
-        #     cur.execute('SELECT * FROM "OnlineShop".orders')
-        #     for record in cur.fetchall():
-        #         if record[0] >= id:
-        #             id = record[0] + 1
-            # insert_script = 'insert into "OnlineShop".orders (orderID, customerID) values (%s, %s)'
-            # insert_value = (id, req["customerID"])
-            # cur.execute(insert_script, insert_value)
-            # insert_script = 'insert into "OnlineShop".orderdetails (productID, orderID) values (%s, %s)'
-            # insert_value = (req["productID"] ,id)
-            # cur.execute(insert_script, insert_value)
-            # conn.commit()
-                 
-    # if boole == False:      
-    #     insert_script = 'insert into "OnlineShop".orders (orderID, customerID) values (%s, %s)'
-    #     insert_value = (id, req["customerID"])
-    #     cur.execute(insert_script, insert_value)
-    #     insert_script = 'insert into "OnlineShop".orderdetails (productID, orderID) values (%s, %s)'
-    #     insert_value = (req["productID"] ,id)
-    #     cur.execute(insert_script, insert_value)
-    #     conn.commit()
-    # cur.execute('SELECT * FROM "OnlineShop".orders')
-    # for record in cur.fetchall():
-    #     if record[0] is None:
-    #         id = 1
-    #     else:
-    #         if record[0] >= id:
-    #             id = record[0] + 1
-                
-    # select_script = 'select p.orderid from "OnlineShop".products p where productid = %s'
-    # select_value = (str(req["productID"]))        
-    # cur.execute(select_script, select_value)
-    # if cur.fetchone()[0] == None:
-    #     insert_script = 'INSERT INTO "OnlineShop".orders (orderID, confirmationDate, requiredDate, shippedDate, status, comments, customerID) VALUES (%s,%s,%s,%s,%s,%s,%s)'
-    #     insert_value = (id, None, localTime(), None, 1, None, req["customerID"])
-    #     cur.execute(insert_script, insert_value)
-    #     conn.commit()
-    #     cur.execute('SELECT * FROM "OnlineShop".products')
-    #     insert_script = 'UPDATE "OnlineShop".products SET orderID = %s where productid = %s'    
-    #     update_value = (id, req["productID"])
-    #     cur.execute(insert_script, update_value)
-    #     conn.commit()
-    #     return {"isRegistrationProductsOrder": True} 
-    # else:
-    #     return {"isRegistrationProductsOrder": False}
-        
+    return {"isRegistrationProductsOrder": True}
 
 @app.post('/product-categories')
 def productCategories(req: dict):
     conn, cur = create_connection()
     products = []
-    select_script = 'select p.productid ,p.productname ,p.saleprice ,p.image ,p.gamereleasedate from "OnlineShop".products p where category = %s'
-    select_value = (str(req["category"]))
+    select_script = 'select * from "OnlineShop".products p join "OnlineShop".category c on p.categoryid = c.categoryid where p.categoryid = %s'
+    select_value = (str(req["categoryid"]))
     cur.execute(select_script, select_value)
     for record in cur.fetchall():
         products.append({
             "productID": record[0],
             "productName": record[1],
-            "salePrice": record[2],
-            "image": record[3],
-            "gameReleaseDate": record[4]
-        })
+            "salePrice": record[4],
+            "discountedPrice": record[5],
+            "image": record[7],
+            "gameReleaseDate": record[8],
+            "categoryName": record[12]})
     return products
 
 @app.post('/finalizing-order')
@@ -285,12 +228,31 @@ def editProductInformation(req: dict):
 @app.post("/customer-order-confirmation")
 def customerOrderConfirmation(req: dict):
     conn, cur = create_connection()
-    update_script = 'UPDATE "OnlineShop".orders SET confirmationDate = %s, status = %s where orderID = %s'
+    update_script = 'UPDATE "OnlineShop".orders SET confirmationDate = %s, statusID = %s where orderID = %s'
     update_value = (localTime(), 2, req["orderID"])
     cur.execute(update_script, update_value)
     conn.commit()
     
     return {"isCustomerOrderConfirmation": True}
+
+@app.get("/get-order-expert")
+def getOrderExpert():
+    orders = []
+    conn, cur = create_connection()
+    cur.execute('''select o.orderID, o.confirmationDate, o.requiredDate, o.statusID, s.statusname, c.customerid, c.customerfullname , c.customeremail 
+                from "OnlineShop".orders o join "OnlineShop".status s on o.statusid = s.statusid join "OnlineShop".customers c on o.customerid = c.customerid 
+                where o.statusid = 1 or o.statusid = 4''')
+    for record in cur.fetchall():
+        orders.append({
+                    "orderID": record[0],
+                    "confirmationDate": record[1],
+                    "requiredDate": record[2],
+                    "statusID": record[3],
+                    "statusName": record[4],
+                    "customerid": record[5],
+                    "customerfullname": record[6],
+                    "customeremail": record[7],})                 
+    return orders
           
                 
 @app.get("/get-sort-product-release")
@@ -442,25 +404,7 @@ def getExpert(req: dict):
     return expert
 
 
-@app.get('/get-registered-orders')
-def getRegisteredOrders():
-    registered_orders = []
-    conn, cur = create_connection()
-    cur.execute('''select o.orderID, o.requiredDate, o.status, p.productName, p.salePrice, p.image, c.customerFullName, c.customerEmail
-                   from "OnlineShop".orders o join "OnlineShop".products p on o.orderid = p.orderid join "OnlineShop".customers c on c.customerid = o.customerid
-                   where o.status = 1''')
-    for record in cur.fetchall(): 
-        registered_orders.append({
-            "orderID": record[0],
-            "requiredDate": record[1],
-            "status": record[2],
-            "productName": record[3],
-            "salePrice": record[4],
-            "image": record[5],
-            "customerFullName": record[6],
-            "customerEmail": record[7]})
-    
-    return registered_orders
+
 
 
 
