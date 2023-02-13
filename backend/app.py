@@ -68,6 +68,15 @@ def productSearch():
                             "productName": record[1]}) 
             
     return products
+
+@app.post("/add-product-basket")
+def addProductBasket(req: dict):
+    conn, cur = create_connection()
+    insert_script = 'insert into "OnlineShop".productBasket (customerID, productID) values (%s, %s)'
+    insert_value = (req["customerID"] ,req["productID"])
+    cur.execute(insert_script, insert_value)
+    conn.commit()
+    return {"isaddProductBasket": True}
     
     
 @app.post("/registration-products-order")
@@ -82,22 +91,80 @@ def registrationProductsOrder(req: dict):
             if record[0] >= id:
                 id = record[0] + 1
                 
-    select_script = 'select p.orderid from "OnlineShop".products p where productid = %s'
-    select_value = (str(req["productID"]))        
-    cur.execute(select_script, select_value)
-    if cur.fetchone()[0] == None:
-        insert_script = 'INSERT INTO "OnlineShop".orders (orderID, confirmationDate, requiredDate, shippedDate, status, comments, customerID) VALUES (%s,%s,%s,%s,%s,%s,%s)'
-        insert_value = (id, None, localTime(), None, 1, None, req["customerID"])
+    insert_script = 'INSERT INTO "OnlineShop".orders (orderID, confirmationDate, requiredDate, shippedDate, customerID, statusID) VALUES (%s,%s,%s,%s,%s,%s)'
+    insert_value = (id, None, localTime(), None, req["customerID"], 1)
+    cur.execute(insert_script, insert_value)
+    conn.commit()
+    select_script = 'select * from "OnlineShop".productbasket p where p.customerID = %s'
+    select_value = (str(req["customerID"]))
+    cur.execute(select_script, select_value)  
+    for record in cur.fetchall():
+        insert_script = 'insert into "OnlineShop".orderdetails (productID, orderID) values (%s, %s)'
+        insert_value = (record[1], id)
         cur.execute(insert_script, insert_value)
-        conn.commit()
-        cur.execute('SELECT * FROM "OnlineShop".products')
-        insert_script = 'UPDATE "OnlineShop".products SET orderID = %s where productid = %s'    
-        update_value = (id, req["productID"])
-        cur.execute(insert_script, update_value)
-        conn.commit()
-        return {"isRegistrationProductsOrder": True} 
-    else:
-        return {"isRegistrationProductsOrder": False}
+        conn.commit() 
+    insert_script = 'delete from "OnlineShop".productbasket where customerid = %s'
+    insert_value = (str(req["customerID"]))
+    cur.execute(insert_script, insert_value)
+    conn.commit() 
+                 
+    
+    
+    # cur.execute('select * from "OnlineShop".orders')
+    # for record2 in cur.fetchall():
+    #     if record2[0] >= id:
+    #         id = record2[0] + 1
+    #     if record2[5] is None:
+    #         boole = True    
+    #         insert_script = 'insert into "OnlineShop".orderdetails (productID, orderID) values (%s, %s)'
+    #         insert_value = (req["productID"] ,record2[0])
+    #         cur.execute(insert_script, insert_value)
+    #         conn.commit()
+        # else:
+        #     cur.execute('SELECT * FROM "OnlineShop".orders')
+        #     for record in cur.fetchall():
+        #         if record[0] >= id:
+        #             id = record[0] + 1
+            # insert_script = 'insert into "OnlineShop".orders (orderID, customerID) values (%s, %s)'
+            # insert_value = (id, req["customerID"])
+            # cur.execute(insert_script, insert_value)
+            # insert_script = 'insert into "OnlineShop".orderdetails (productID, orderID) values (%s, %s)'
+            # insert_value = (req["productID"] ,id)
+            # cur.execute(insert_script, insert_value)
+            # conn.commit()
+                 
+    # if boole == False:      
+    #     insert_script = 'insert into "OnlineShop".orders (orderID, customerID) values (%s, %s)'
+    #     insert_value = (id, req["customerID"])
+    #     cur.execute(insert_script, insert_value)
+    #     insert_script = 'insert into "OnlineShop".orderdetails (productID, orderID) values (%s, %s)'
+    #     insert_value = (req["productID"] ,id)
+    #     cur.execute(insert_script, insert_value)
+    #     conn.commit()
+    # cur.execute('SELECT * FROM "OnlineShop".orders')
+    # for record in cur.fetchall():
+    #     if record[0] is None:
+    #         id = 1
+    #     else:
+    #         if record[0] >= id:
+    #             id = record[0] + 1
+                
+    # select_script = 'select p.orderid from "OnlineShop".products p where productid = %s'
+    # select_value = (str(req["productID"]))        
+    # cur.execute(select_script, select_value)
+    # if cur.fetchone()[0] == None:
+    #     insert_script = 'INSERT INTO "OnlineShop".orders (orderID, confirmationDate, requiredDate, shippedDate, status, comments, customerID) VALUES (%s,%s,%s,%s,%s,%s,%s)'
+    #     insert_value = (id, None, localTime(), None, 1, None, req["customerID"])
+    #     cur.execute(insert_script, insert_value)
+    #     conn.commit()
+    #     cur.execute('SELECT * FROM "OnlineShop".products')
+    #     insert_script = 'UPDATE "OnlineShop".products SET orderID = %s where productid = %s'    
+    #     update_value = (id, req["productID"])
+    #     cur.execute(insert_script, update_value)
+    #     conn.commit()
+    #     return {"isRegistrationProductsOrder": True} 
+    # else:
+    #     return {"isRegistrationProductsOrder": False}
         
 
 @app.post('/product-categories')
@@ -127,15 +194,19 @@ def finalizingOrder(req: dict):
     
     return {"isFinalizingOrder": True}
 
+
+
 @app.post('/cancel-order')
 def cancelOrder(req: dict):
     conn, cur = create_connection()
-    update_script = 'UPDATE "OnlineShop".orders SET status = %s where orderID = %s'
+    update_script = 'UPDATE "OnlineShop".orders SET statusID = %s where orderID = %s'
     update_value = (4, req["orderID"])
     cur.execute(update_script, update_value)
     conn.commit()
     
     return {"isCancelOrder": True}
+
+
 
 @app.post('/registration-satisfaction')
 def registrationSatisfaction(req: dict):
@@ -261,38 +332,76 @@ def getProduct(req: dict):
     return product
 
 
-@app.post("/get-product-order")
-def getProductOrder(req: dict):
+@app.post("/get-prodect-basket")
+def getProdectBasket(req: dict):
     products =[]
     conn, cur = create_connection()
-    cur.execute('''select p.productid ,p.productname ,p.productvendor ,p.buyprice ,p.saleprice , p.textdescription ,p.image ,p.gamereleasedate ,category ,o.customerid ,o.orderid, o.status
-                from "OnlineShop".orders o join "OnlineShop".products p 
-                on o.orderid = p.orderid ''')
+    select_script = 'select * from "OnlineShop".productbasket p join "OnlineShop".products p2 on p.productid = p2.productid where p.customerid = %s'
+    select_value = (str(req["customerID"]))
+    cur.execute(select_script, select_value)  
     for record in cur.fetchall():
-        if record[9] == req["customerID"]:
-            products.append({
-                        "productID": record[0],
-                        "productName": record[1],
-                        "productVendor": record[2],
-                        "buyPrice": record[3],
-                        "salePrice": record[4],
-                        "textDescription": record[5],
-                        "image": record[6],
-                        "gameReleaseDate": record[7],
-                        "category": record[8],
-                        "orderID": record[10],
-                        "status": record[11]})     
+        products.append({
+                    "productID": record[1],
+                    "productName": record[3],
+                    "salePrice": record[6],
+                    "discountedPrice": record[7],
+                    "image": record[9]})     
             
     return products
+
+@app.post("/delete-peoduct-basket")
+def deleteProductBasket(req: dict):
+    conn, cur = create_connection()
+    delete_script = 'delete from "OnlineShop".productbasket where customerid = %s and productid = %s'
+    delete_value = (req["customerid"], req["productid"])
+    cur.execute(delete_script, delete_value)
+    conn.commit()
+    return {"isdeleteProductBasket": True}
+    
+    
+@app.post("/get-product-order")
+def getProductOrder(req: dict):
+    products = []
+    conn, cur = create_connection()
+    select_script = '''select p.productid ,p.productname ,p.saleprice ,p.discountedprice 
+                from "OnlineShop".orders o join "OnlineShop".orderdetails o2  on o.orderid = o2.orderid join "OnlineShop".products p on p.productid = o2.productid 
+                where o.orderid = %s'''
+    select_value = (str(req["orderid"]))
+    cur.execute(select_script, select_value)
+    for record in cur.fetchall():
+        products.append({
+                    "productID": record[0],
+                    "productName": record[1],
+                    "salePrice": record[2],
+                    "discountedprice": record[3]})     
+            
+    return products
+
+@app.post("/get-order")
+def getOrder(req: dict):
+    orders = []
+    conn, cur = create_connection()
+    select_script = 'select * from "OnlineShop".orders o join "OnlineShop".status s on o.statusid = s.statusid where customerid = %s'
+    select_value = (str(req["customerID"]))
+    cur.execute(select_script, select_value)
+    for record in cur.fetchall():
+        orders.append({
+                    "orderID": record[0],
+                    "confirmationDate": record[1],
+                    "requiredDate": record[2],
+                    "shippedDate": record[3],
+                    "statusID": record[5],
+                    "statusName": record[7]})                 
+    return orders
 
 
 @app.post("/delete-order")
 def deleteOrder(req: dict):
     conn, cur = create_connection()
-    update_script = 'update "OnlineShop".products set orderID = null where orderID = %s'
-    update_value = (str(req["orderID"]))
-    cur.execute(update_script, update_value)
-    delete_script =  'delete from "OnlineShop".orders where orderID = %s'
+    delete_script =  'delete from "OnlineShop".orderdetails o2 where o2.orderid = %s'
+    delete_value = (str(req["orderID"]))
+    cur.execute(delete_script, delete_value)
+    delete_script =  'delete from "OnlineShop".orders o where o.orderid = %s'
     delete_value = (str(req["orderID"]))
     cur.execute(delete_script, delete_value)
     conn.commit()
