@@ -40,10 +40,11 @@ class Product {
       this.orderID,
       this.status);
 
-  Product.full(
+  Product.homePage(
     this.name,
     this.imageURL,
     this.sellPrice,
+    this.discountedPrice,
     this.ID,
     this.categoryCode,
     this.gameReleaseDate,

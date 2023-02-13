@@ -10,16 +10,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 class homePage extends StatefulWidget {
   homePage({Key? key}) : super(key: key);
-  // final Categories action =
-  //     Categories.full('Action', 'asset/image/CategoriesImage/action.png');
-  // final Categories strategic =
-  //     Categories.full('strategic', 'asset/image/CategoriesImage/strategic.png');
-  // final Categories survival =
-  //     Categories.full('survival', 'asset/image/CategoriesImage/survival.png');
-  // final Categories sport =
-  //     Categories.full('sport', 'asset/image/CategoriesImage/sport.png');
-  // final Categories shooter =
-  //     Categories.full('shooter', 'asset/image/CategoriesImage/shooter.png');
   static List<Categories> categories = [
     Categories.full('Action', 'asset/image/CategoriesImage/action.png', 1),
     Categories.full(
@@ -46,10 +36,11 @@ class _homePageState extends State<homePage> {
     List<dynamic> decoded = json.decode(response.body);
     setState(() {
       for (int x = 0; x < decoded.length; x++) {
-        Product product = Product.full(
+        Product product = Product.homePage(
             decoded[x]['productName'],
             decoded[x]['image'],
             decoded[x]['salePrice'],
+            decoded[x]['discountedPrice'],
             decoded[x]['productID'],
             decoded[x]['category'],
             decoded[x]['gameReleaseDate']);
@@ -74,10 +65,11 @@ class _homePageState extends State<homePage> {
     catProducts = [];
     setState(() {
       for (int x = 0; x < decoded.length; x++) {
-        Product product = Product.full(
+        Product product = Product.homePage(
             decoded[x]['productName'],
             decoded[x]['image'],
             decoded[x]['salePrice'],
+            decoded[x]['discountedPrice'],
             decoded[x]['productID'],
             homePage.catCode,
             decoded[x]['gameReleaseDate']);
@@ -215,7 +207,38 @@ class _homePageState extends State<homePage> {
                                             maxLines: 1,
                                             softWrap: false,
                                             style: TextStyle(fontSize: 20)),
-                                        Text(result.sellPrice.toString()),
+                                        RichText(
+                                          text: TextSpan(
+                                            text: '',
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              color: Colors.black,
+                                            ),
+                                            children: <TextSpan>[
+                                              TextSpan(
+                                                text:
+                                                    '\$${result.sellPrice.toDouble()}',
+                                                style: const TextStyle(
+                                                  fontSize: 15,
+                                                  color: Colors.black,
+                                                  decoration: TextDecoration
+                                                      .lineThrough,
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                text:
+                                                    ' ${result.discountedPrice}% ',
+                                                style: const TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 10,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Text(
+                                            ' \$${result.sellPrice.toDouble() - (result.sellPrice.toDouble() * result.discountedPrice.toDouble() / 100)} ',
+                                            style: TextStyle(fontSize: 15)),
                                       ],
                                     ),
                                   ),
@@ -320,24 +343,83 @@ class _homePageState extends State<homePage> {
                               ),
                             ),
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    catProducts[index].name,
-                                    overflow: TextOverflow.fade,
-                                    maxLines: 1,
-                                    softWrap: false,
-                                    style: TextStyle(fontSize: 20),
+                              child: Container(
+                                height: 100,
+                                child: Stack(children: [
+                                  Positioned(
+                                    right: 0,
+                                    child: ImageIcon(
+                                      AssetImage(
+                                        homePage
+                                            .categories[catProducts[index]
+                                                    .categoryCode -
+                                                1]
+                                            .imageURL,
+                                      ),
+                                      color: Colors.grey[300],
+                                      size: 100,
+                                    ),
                                   ),
-                                  SizedBox(
-                                    height: 10,
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      Text(
+                                        catProducts[index].name,
+                                        overflow: TextOverflow.fade,
+                                        maxLines: 1,
+                                        softWrap: false,
+                                        style: TextStyle(fontSize: 20),
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      RichText(
+                                        text: TextSpan(
+                                          text: 'price :',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            color: Colors.black,
+                                          ),
+                                          children: <TextSpan>[
+                                            TextSpan(
+                                              text:
+                                                  '\$${catProducts[index].sellPrice.toDouble()}',
+                                              style: const TextStyle(
+                                                fontSize: 15,
+                                                color: Colors.black,
+                                                decoration:
+                                                    TextDecoration.lineThrough,
+                                              ),
+                                            ),
+                                            TextSpan(
+                                              text:
+                                                  ' ${catProducts[index].discountedPrice}% ',
+                                              style: const TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 10,
+                                              ),
+                                            ),
+                                            TextSpan(
+                                              text:
+                                                  ' \$${(catProducts[index].sellPrice.toDouble() - (catProducts[index].sellPrice.toDouble() * catProducts[index].discountedPrice.toDouble() / 100)).toStringAsFixed(2)} ',
+                                              style: const TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 15,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 5,
+                                      ),
+                                      Text(
+                                        '${catProducts[index].gameReleaseDate.substring(0, 4)}',
+                                      )
+                                    ],
                                   ),
-                                  Text(
-                                    'price : ${catProducts[index].sellPrice.toString()} \$',
-                                    style: TextStyle(fontSize: 15),
-                                  ),
-                                ],
+                                ]),
                               ),
                             ),
                           ],

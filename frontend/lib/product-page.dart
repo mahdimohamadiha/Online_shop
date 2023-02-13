@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:online_shop/ProfilePage.dart';
+import 'package:online_shop/home-page.dart';
 import 'package:online_shop/product.dart';
 import 'package:http/http.dart' as http;
 
@@ -102,44 +103,56 @@ class _ProductPageState extends State<ProductPage> {
                               ),
                               height: 300,
                               width: double.infinity,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: EdgeInsets.symmetric(
-                                        vertical: 20, horizontal: 20),
-                                    child: Text(
-                                      'Product Name :  ${product.name}',
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.symmetric(
-                                        vertical: 5, horizontal: 20),
-                                    child: Text(
-                                      'Release : ${product.gameReleaseDate.substring(0, 4)}',
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.symmetric(
-                                        vertical: 0, horizontal: 20),
-                                    child: Text(
-                                      'from : ${product.publisher}',
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                            ),
+                            Positioned(
+                              left: 50,
+                              top: 0,
+                              child: ImageIcon(
+                                AssetImage(
+                                  homePage.categories[product.categoryCode - 1]
+                                      .imageURL,
+                                ),
+                                color: Colors.grey[500],
+                                size: 300,
                               ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 20, horizontal: 20),
+                                  child: Text(
+                                    'Product Name :  ${product.name}',
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 5, horizontal: 20),
+                                  child: Text(
+                                    'Release : ${product.gameReleaseDate.substring(0, 4)}',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 0, horizontal: 20),
+                                  child: Text(
+                                    'from : ${product.publisher}',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             Positioned(
                               top: 150,
@@ -152,7 +165,18 @@ class _ProductPageState extends State<ProductPage> {
                                   width: 200,
                                 ),
                               ),
-                            )
+                            ),
+                            Positioned(
+                              left: 10,
+                              top: 200,
+                              child: ImageIcon(
+                                AssetImage(
+                                  homePage.categories[product.categoryCode - 1]
+                                      .imageURL,
+                                ),
+                                color: Colors.black,
+                              ),
+                            ),
                           ],
                         ),
                         Padding(
@@ -281,18 +305,22 @@ class _ProductPageState extends State<ProductPage> {
                                   },
                                 ),
                         ),
-                        Expanded(
-                          child: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                notif = !notif;
-                              });
-                            },
-                            icon: notif
-                                ? Icon(Icons.notifications_none)
-                                : Icon(Icons.notifications_active),
-                          ),
-                        ),
+                        ProfilePage.isAdmin
+                            ? Container()
+                            : ProfilePage.logedIn
+                                ? Expanded(
+                                    child: IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          notif = !notif;
+                                        });
+                                      },
+                                      icon: notif
+                                          ? Icon(Icons.notifications_none)
+                                          : Icon(Icons.notifications_active),
+                                    ),
+                                  )
+                                : Container(),
                       ],
                     ),
                   ),
@@ -301,11 +329,40 @@ class _ProductPageState extends State<ProductPage> {
                     padding: const EdgeInsets.only(left: 8.0, bottom: 10),
                     child: Row(
                       children: [
-                        Text(
-                          'price : ${product.sellPrice.toDouble()} ',
-                          style: TextStyle(fontSize: 20),
+                        RichText(
+                          text: TextSpan(
+                            text: 'price :',
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.black,
+                            ),
+                            children: <TextSpan>[
+                              TextSpan(
+                                text: '\$${product.sellPrice.toDouble()}',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  color: Colors.black,
+                                  decoration: TextDecoration.lineThrough,
+                                ),
+                              ),
+                              TextSpan(
+                                text: ' ${product.discountedPrice}% ',
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              TextSpan(
+                                text:
+                                    ' \$${product.sellPrice.toDouble() - (product.sellPrice.toDouble() * product.discountedPrice.toDouble() / 100)} ',
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 20,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        Icon(Icons.attach_money),
                       ],
                     ),
                   ))
