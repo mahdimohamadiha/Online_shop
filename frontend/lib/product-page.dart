@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:online_shop/Comment.dart';
 import 'package:online_shop/ProfilePage.dart';
 import 'package:online_shop/home-page.dart';
 import 'package:online_shop/product.dart';
@@ -25,6 +26,9 @@ class _ProductPageState extends State<ProductPage> {
 
   @override
   void initState() {
+    Comment c =
+        Comment('amir', 'in bazi kheiliiiii khoobee', 1, 2, 1, 20, 'date');
+    comments.add(c);
     _ProductPageState(product);
   }
 
@@ -61,7 +65,7 @@ class _ProductPageState extends State<ProductPage> {
           color: Colors.green,
         ),
       ));
-  List comments = ['amir', 'ali'];
+  List<Comment> comments = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -210,17 +214,37 @@ class _ProductPageState extends State<ProductPage> {
                       ),
                     ),
                   ),
-                  // ListView.builder(
-                  //     itemCount: 5,
-                  //     itemBuilder: (BuildContext context, int index) {
-                  //       return ListTile(
-                  //           leading: const Icon(Icons.list),
-                  //           trailing: const Text(
-                  //             "GFG",
-                  //             style: TextStyle(color: Colors.green, fontSize: 15),
-                  //           ),
-                  //           title: Text("List item $index"));
-                  //     }),
+                  // SliverList(
+                  //   delegate: SliverChildListDelegate(
+                  //     [
+                  //       SingleChildScrollView(
+                  //         child: ListView.builder(
+                  //             itemCount: 5,
+                  //             physics: NeverScrollableScrollPhysics(),
+                  //             itemBuilder: (context, index) {
+                  //               return ListTile(
+                  //                   leading: const Icon(Icons.list),
+                  //                   trailing: const Text(
+                  //                     "GFG",
+                  //                     style: TextStyle(
+                  //                         color: Colors.green, fontSize: 15),
+                  //                   ),
+                  //                   title: Text("List item $index"));
+                  //             }),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // )
+                  const SliverToBoxAdapter(
+                    child: Center(
+                      child: Text(
+                        'Comments',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 24),
+                      ),
+                    ),
+                  ),
+
                   SliverList(
                     delegate: SliverChildListDelegate(
                       List.generate(
@@ -229,8 +253,61 @@ class _ProductPageState extends State<ProductPage> {
                           return Padding(
                             padding: EdgeInsets.all(10),
                             child: Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.grey[300],
+                                  borderRadius: BorderRadius.circular(15)),
                               child: Column(
-                                children: [Text(comments[index])],
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          ' ${comments[index].userName} :',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 20),
+                                        ),
+                                        Text(
+                                          ' ${comments[index].date}',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 20),
+                                        ),
+                                        Row(
+                                          children: [
+                                            Text(comments[index]
+                                                .likes
+                                                .toString()),
+                                            Icon(
+                                              Icons.favorite_outlined,
+                                              color: Colors.red,
+                                            ),
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Container(
+                                      width: 400,
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          border: Border.all(
+                                              color: Colors.white70, width: 1)),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child:
+                                            Text(comments[index].textComment),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           );
@@ -283,38 +360,41 @@ class _ProductPageState extends State<ProductPage> {
                           )
                         : ElevatedButton(
                             child: Text("add to shopping card"),
-                            onPressed: () async {
-                              if (ProfilePage.logedIn) {
-                                final headers = {
-                                  'Content-Type': 'application/json'
-                                };
-                                Uri urlGetProduct = Uri.parse(
-                                    "${MyApp.url}/add-product-basket");
-                                final response = await http.post(urlGetProduct,
-                                    headers: headers,
-                                    body: json.encode({
-                                      'productID': product.ID,
-                                      'customerID': ProfilePage.user.id
-                                    }));
-                                var decoded = json.decode(response.body);
-                                print(decoded);
-                                if (decoded['isaddProductBasket']) {
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(snackBarSuccess);
-                                } else {
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(snackBarError2);
-                                }
-                              } else {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(snackBarError);
-                              }
-                            },
+                            onPressed: product.stock == 0
+                                ? null
+                                : () async {
+                                    if (ProfilePage.logedIn) {
+                                      final headers = {
+                                        'Content-Type': 'application/json'
+                                      };
+                                      Uri urlGetProduct = Uri.parse(
+                                          "${MyApp.url}/add-product-basket");
+                                      final response = await http.post(
+                                          urlGetProduct,
+                                          headers: headers,
+                                          body: json.encode({
+                                            'productID': product.ID,
+                                            'customerID': ProfilePage.user.id
+                                          }));
+                                      var decoded = json.decode(response.body);
+                                      print(decoded);
+                                      if (decoded['isaddProductBasket']) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(snackBarSuccess);
+                                      } else {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(snackBarError2);
+                                      }
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(snackBarError);
+                                    }
+                                  },
                           ),
                   ),
                   ProfilePage.isAdmin
                       ? Container()
-                      : ProfilePage.logedIn
+                      : ProfilePage.logedIn && product.stock == 0
                           ? Expanded(
                               child: IconButton(
                                 onPressed: () {

@@ -84,7 +84,18 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
   Widget build(BuildContext context) {
     return ProfilePage.logedIn
         ? orders.isEmpty
-            ? Text('your shopping cart is empty')
+            ? Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.black12, width: 2)),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Text(
+                    'your shopping cart is empty',
+                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              )
             : Scaffold(
                 body: SafeArea(
                   child: CustomScrollView(

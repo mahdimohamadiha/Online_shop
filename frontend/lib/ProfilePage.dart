@@ -215,6 +215,41 @@ class _AdminProfileState extends State<AdminProfile> {
                       context,
                       MaterialPageRoute(
                         builder: (context) {
+                          return ExpertOrderPage();
+                        },
+                      ),
+                    );
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Report',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Icon(Icons.history)
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 15),
+              height: 50,
+              decoration:
+                  BoxDecoration(borderRadius: BorderRadius.circular(30)),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
                           return NewProductPage(
                             product: Product.searchList('name', 1),
                             isEdit: false,
@@ -462,12 +497,13 @@ class _UserprofileState extends State<Userprofile> {
                       children: [
                         Text(
                           'orders',
-                          style: TextStyle(fontSize: 15),
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
                         ),
                         SizedBox(
                           width: 20,
                         ),
-                        Icon(Icons.production_quantity_limits),
+                        Icon(Icons.shopping_basket_sharp),
                       ],
                     ),
                   ),
@@ -487,7 +523,8 @@ class _UserprofileState extends State<Userprofile> {
                       children: [
                         Text(
                           'logout',
-                          style: TextStyle(fontSize: 15),
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
                         ),
                         SizedBox(
                           width: 20,
