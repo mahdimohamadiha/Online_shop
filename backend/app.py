@@ -329,7 +329,7 @@ def deleteProductBasket(req: dict):
 def getProductOrder(req: dict):
     products = []
     conn, cur = create_connection()
-    select_script = '''select p.productid ,p.productname ,p.saleprice ,p.discountedprice 
+    select_script = '''select p.productid ,p.productname ,p.saleprice ,p.discountedprice , o2.satisfaction 
                 from "OnlineShop".orders o join "OnlineShop".orderdetails o2  on o.orderid = o2.orderid join "OnlineShop".products p on p.productid = o2.productid 
                 where o.orderid = %s'''
     select_value = (str(req["orderid"]))
@@ -339,7 +339,8 @@ def getProductOrder(req: dict):
                     "productID": record[0],
                     "productName": record[1],
                     "salePrice": record[2],
-                    "discountedprice": record[3]})     
+                    "discountedprice": record[3],
+                    "satisfaction": record[4]})     
             
     return products
 
@@ -465,5 +466,188 @@ def stockNotices(req: dict):
     return products
 
 
+@app.post('/sales-amount-number-product')
+def salesAmountNumberProduct(req: dict):
+    conn, cur = create_connection()
+    saleAmountNumberProduct = []
+    select_script = ''' select p.productid,p.productname ,count(p.productid) ,sum(p.discountedprice) from "OnlineShop".orders o join "OnlineShop".orderdetails o2 on o.orderid = o2.orderid join "OnlineShop".products p on o2.productID = p.productid 
+                        where o.statusid = 3 and o.confirmationdate between '%s-%s-%s 00:00:00' and '%s-%s-%s 23:59:59'
+                        group by p.productid '''
+    select_value = (req["year"],req["startMonth"],req["startDay"],req["year"],req["endMonth"],req["endDay"])
+    cur.execute(select_script, select_value)
+    for record in cur.fetchall():
+        saleAmountNumberProduct.append({
+            "productid": record[0],
+            "productname": record[1],
+            "Number": record[2],
+            "sumDiscountedprice": record[3]
+        })
+    return saleAmountNumberProduct
+
+@app.post('/sales-amount-sale-value-product')
+def salesAmountSaleValueProduct(req: dict):
+    conn, cur = create_connection()
+    saleAmountSaleValueProduct = []
+    select_script = ''' select p.productid,p.productname, p.discountedprice  ,count(p.productid) ,sum(p.discountedprice) from "OnlineShop".orders o join "OnlineShop".orderdetails o2 on o.orderid = o2.orderid join "OnlineShop".products p on o2.productID = p.productid 
+                        where o.statusid = 3 and p.discountedprice between %s and %s and o.confirmationdate between '%s-%s-%s 00:00:00' and '%s-%s-%s 23:59:59'
+                        group by p.productid '''
+    select_value = (req["startPrice"],req["endPrice"],req["year"],req["startMonth"],req["startDay"],req["year"],req["endMonth"],req["endDay"])
+    cur.execute(select_script, select_value)
+    for record in cur.fetchall():
+        saleAmountSaleValueProduct.append({
+            "productid": record[0],
+            "productname": record[1],
+            "discountedprice": record[2],
+            "Number": record[3],
+            "sumDiscountedprice": record[4]
+        })
+    return saleAmountSaleValueProduct
+
+@app.post('/sales-amount-category-product')
+def salesAmountCategoryProduct(req: dict):
+    conn, cur = create_connection()
+    saleAmountCategoryProduct = []
+    select_script = ''' select c.categoryname ,c.categoryid ,count(p.productid) ,sum(p.discountedprice) 
+                        from "OnlineShop".orders o join "OnlineShop".orderdetails o2 on o.orderid = o2.orderid join "OnlineShop".products p on o2.productID = p.productid join "OnlineShop".category c on c.categoryid = p.categoryid 
+                        where o.statusid = 3 and o.confirmationdate between '%s-%s-%s 00:00:00' and '%s-%s-%s 23:59:59' 
+                        group by c.categoryid  '''
+    select_value = (req["year"],req["startMonth"],req["startDay"],req["year"],req["endMonth"],req["endDay"])
+    cur.execute(select_script, select_value)
+    for record in cur.fetchall():
+        saleAmountCategoryProduct.append({
+            "categoryname": record[0],
+            "categoryid": record[1],
+            "Number": record[2],
+            "sumDiscountedprice": record[3]
+        })
+    return saleAmountCategoryProduct
+
+@app.post('/period-satisfaction')
+def periodSatisfaction(req: dict):
+    conn, cur = create_connection()
+    periodSatisfaction = []
+    select_script = ''' select p.productname ,p.productID, avg(s.satisfactionRate)::numeric (3,2) from "OnlineShop".satisfaction s join "OnlineShop".products p on s.productID = p.productid  
+                        where s.satisfactionDate between '%s-%s-%s 00:00:00' and '%s-%s-%s 23:59:59'
+                        group by p.productID '''
+    select_value = (req["startyear"],req["startMonth"],req["startDay"],req["endyear"],req["endMonth"],req["endDay"])
+    cur.execute(select_script, select_value)
+    for record in cur.fetchall():
+        periodSatisfaction.append({
+            "productname": record[0],
+            "productID": record[1],
+            "satisfactionRate": record[2]
+        })
+    return periodSatisfaction
+
+@app.get('/category-satisfaction')
+def categorySatisfaction():
+    conn, cur = create_connection()
+    categorySatisfaction = []
+    cur.execute(''' select c.categoryname  ,c.categoryid , avg(s.satisfactionRate)::numeric (3,2) 
+                    from "OnlineShop".satisfaction s join "OnlineShop".products p on s.productID = p.productid join "OnlineShop".category c on c.categoryid = p.categoryid 
+                    group by c.categoryid ''')
+    for record in cur.fetchall():
+        categorySatisfaction.append({
+            "categoryname": record[0],
+            "categoryid": record[1],
+            "satisfactionRate": record[2]
+        })
+    return categorySatisfaction
+
+@app.post('/profit-sale')
+def profitSale(req: dict):
+    conn, cur = create_connection()
+    profitSale = []
+    select_script = ''' select sum(p.saleprice) ,sum(p.discountedprice), sum(p.buyprice) 
+                        from "OnlineShop".products p join "OnlineShop".orderdetails o2 on p.productid = o2.productid join "OnlineShop".orders o on o.orderid = o2.orderid
+                        where o.confirmationdate between '%s-%s-%s 00:00:00' and '%s-%s-%s 23:59:59' '''
+    select_value = (req["year"],req["startMonth"],req["startDay"],req["year"],req["endMonth"],req["endDay"])
+    cur.execute(select_script, select_value)
+    for record in cur.fetchall():
+        profitSale.append({
+            "sumSaleprice": record[0],
+            "sumDiscountedprice": record[1],
+            "sumBuyprice": record[2]
+            
+        })
+    return profitSale
+
+
+@app.post('/add-comment')
+def addComment(req: dict):
+    id = 1
+    conn, cur = create_connection()
+    cur.execute('SELECT * FROM "OnlineShop"."comments"')
+    for record in cur.fetchall():
+        if record[0] is None:
+            id = 1
+        else:
+            if record[0] >= id:
+                id = record[0] + 1
+    insert_script = 'insert into "OnlineShop"."comments" values (%s ,%s , %s, %s, False, %s)'
+    insert_value = (id,req["productID"], req["customerID"], req["textComment"], req["commentDate"])
+    cur.execute(insert_script, insert_value)
+    conn.commit()
+    return {"isAddComment": True}
+
+@app.post('/get-comment')
+def getComment(req: dict):
+    conn, cur = create_connection()
+    comment = []
+    i = 0
+    select_script = ''' select c.commentid ,c.textcomment ,c.commentdate ,c2.customerfullname 
+    from "OnlineShop"."comments" c join "OnlineShop".customers c2 on c.customerid = c2.customerid 
+    where c.productid = %s and c.confirmationadmin = false  '''
+    select_value = (str(req["productid"]))
+    cur.execute(select_script, select_value)
+    for record in cur.fetchall():
+        confirmation = 0
+        rejection = 0
+        comment.append({
+            "commentid": record[0],
+            "textcomment": record[1],
+            "commentdate": record[2],
+            "customerfullname": record[3]
+        })
+        select_script = ''' select c.commentid , count(c.commentid) from "OnlineShop".confirmationrejection c 
+                            where c.commentid = %s and c.conrej = true
+                            group by c.commentid  '''
+        select_value = (str(record[0]))
+        cur.execute(select_script, select_value)
+        for record in cur.fetchall():
+            confirmation = record[1]
+        comment[i]["confirmation"] = confirmation
+        select_script = ''' select c.commentid , count(c.commentid) from "OnlineShop".confirmationrejection c 
+                            where c.commentid = %s and c.conrej = false
+                            group by c.commentid  '''
+        select_value = (str(record[0]))
+        cur.execute(select_script, select_value)
+        for record in cur.fetchall():
+            rejection = record[1]
+        comment[i]["rejection"] = rejection
+        i = i + 1
+        
+    return comment
+
+@app.post('/confirmation-commit')
+def confirmationCommit(req: dict):
+    conn, cur = create_connection()
+    boole = False
+    select_script = ''' select * from "OnlineShop".confirmationrejection c where c.commentid = %s and c.customerid = %s '''
+    select_value = (req["commentid"], req["customerid"])
+    cur.execute(select_script, select_value)
+    for record in cur.fetchall(): 
+        boole = True
+    if boole == False:
+        insert_script = 'insert into "OnlineShop".confirmationrejection values (%s,%s,true)'
+        insert_value = (req["commentid"], req["customerid"])
+        cur.execute(insert_script, insert_value)
+        conn.commit()
+    else:
+        update_script = 'UPDATE "OnlineShop".confirmationrejection c SET conrej = true where c.commentid = %s and c.customerid = %s'
+        update_value = (req["commentid"], req["customerid"])
+        cur.execute(update_script, update_value)
+        conn.commit()
+        
 if __name__ == '__main__':
     uvicorn.run("app:app", reload=True)
