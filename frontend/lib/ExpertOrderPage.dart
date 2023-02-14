@@ -10,49 +10,17 @@ import 'package:online_shop/home-page.dart';
 import 'package:online_shop/product.dart';
 import 'package:online_shop/user.dart';
 
+import 'OrdersPage.dart';
 import 'main.dart';
 
-class Order {
-  late int orderId;
-  late int statusID;
-  late int userId;
-  late String userFullName;
-  late String userEmail;
-  late String? confirmationDate;
-  late String requiredDate;
-  late String? shippedDate;
-  late List<Product> products = [];
-  double sumOfPrices = 0;
-  double sumOfDiscountPrices = 0;
-
-  Order.expert(
-    this.orderId,
-    this.statusID,
-    this.userId,
-    this.userFullName,
-    this.userEmail,
-    this.confirmationDate,
-    this.requiredDate,
-  );
-
-  Order.user(
-    this.orderId,
-    this.statusID,
-    this.userId,
-    this.confirmationDate,
-    this.requiredDate,
-    this.shippedDate,
-  );
-}
-
-class UserOrderPage extends StatefulWidget {
-  const UserOrderPage({Key? key}) : super(key: key);
+class ExpertOrderPage extends StatefulWidget {
+  const ExpertOrderPage({Key? key}) : super(key: key);
 
   @override
-  State<UserOrderPage> createState() => _UserOrderPageState();
+  State<ExpertOrderPage> createState() => _ExpertOrderPageState();
 }
 
-class _UserOrderPageState extends State<UserOrderPage> {
+class _ExpertOrderPageState extends State<ExpertOrderPage> {
   List<Order> orders = [];
   @override
   void initState() {
@@ -62,21 +30,20 @@ class _UserOrderPageState extends State<UserOrderPage> {
   }
 
   Future<void> getOrders() async {
-    final Uri url = Uri.parse("${MyApp.url}/get-order");
+    final Uri url = Uri.parse("${MyApp.url}/get-order-expert");
     final headers = {'Content-Type': 'application/json'};
-    final response = await http.post(url,
-        headers: headers,
-        body: jsonEncode({"customerID": ProfilePage.user.id}));
+    final response = await http.get(url, headers: headers);
     List<dynamic> decoded = json.decode(response.body);
     orders = [];
     for (int x = 0; x < decoded.length; x++) {
-      Order order = Order.user(
+      Order order = Order.expert(
         decoded[x]['orderID'],
         decoded[x]['statusID'],
-        ProfilePage.user.id,
+        decoded[x]['customerid'],
+        decoded[x]['customerfullname'],
+        decoded[x]['customeremail'],
         decoded[x]['confirmationDate'],
         decoded[x]['requiredDate'],
-        decoded[x]['shippedDate'],
       );
       getProductsOrder(order);
 
@@ -125,7 +92,8 @@ class _UserOrderPageState extends State<UserOrderPage> {
             padding: EdgeInsets.all(10),
             child: Container(
               decoration: BoxDecoration(
-                  color: Colors.grey, borderRadius: BorderRadius.circular(20)),
+                  color: Colors.grey[600],
+                  borderRadius: BorderRadius.circular(20)),
               child: Column(
                 children: [
                   Padding(
@@ -140,6 +108,46 @@ class _UserOrderPageState extends State<UserOrderPage> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            Icon(Icons.person_outlined),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Text(
+                              '${orders[orderIndex].userFullName}',
+                              style: TextStyle(fontSize: 20),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            Icon(Icons.email_outlined),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Text(
+                              '${orders[orderIndex].userEmail}',
+                              style: TextStyle(fontSize: 20),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
                         child: Text(
                           'Products:',
                           style: TextStyle(fontSize: 20),
@@ -148,14 +156,14 @@ class _UserOrderPageState extends State<UserOrderPage> {
                     ],
                   ),
                   SizedBox(
-                    height: 170,
+                    height: 120,
                     child: Padding(
                       padding: const EdgeInsets.only(
                           left: 20.0, right: 20, bottom: 20, top: 5),
                       child: Container(
                         decoration: BoxDecoration(
                             color: Colors.grey[400],
-                            borderRadius: BorderRadius.circular(20)),
+                            borderRadius: BorderRadius.circular(15)),
                         child: ListView.builder(
                           itemCount: orders[orderIndex].products.length,
                           itemBuilder: (context, productIndex) {
@@ -179,12 +187,12 @@ class _UserOrderPageState extends State<UserOrderPage> {
                                             child: Text('${productIndex + 1}'),
                                           ),
                                           Padding(
-                                            padding: const EdgeInsets.all(20.0),
+                                            padding: const EdgeInsets.all(10),
                                             child: Text(p.name.toString()),
                                           ),
                                           Padding(
                                             padding: const EdgeInsets.only(
-                                                bottom: 10),
+                                                bottom: 5),
                                             child: RichText(
                                               text: TextSpan(
                                                 text: 'price : ',
@@ -241,84 +249,6 @@ class _UserOrderPageState extends State<UserOrderPage> {
                                                         fontWeight:
                                                             FontWeight.bold),
                                                   ),
-                                                ],
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: Column(
-                                                children: [
-                                                  SizedBox(
-                                                    height: 5,
-                                                  ),
-                                                  CircleAvatar(
-                                                    backgroundColor:
-                                                        Colors.blueGrey,
-                                                    child: IconButton(
-                                                        onPressed: () {
-                                                          if (p.score < 5) {
-                                                            setState(() {
-                                                              p.score++;
-                                                            });
-                                                          }
-                                                        },
-                                                        icon: Icon(Icons
-                                                            .keyboard_arrow_up)),
-                                                  ),
-                                                  CircleAvatar(
-                                                    backgroundColor:
-                                                        Colors.blueGrey,
-                                                    child: IconButton(
-                                                        onPressed: () async {
-                                                          final Uri url = Uri.parse(
-                                                              "${MyApp.url}/registration-satisfaction");
-                                                          final headers = {
-                                                            'Content-Type':
-                                                                'application/json'
-                                                          };
-                                                          final response =
-                                                              await http.post(
-                                                                  url,
-                                                                  headers:
-                                                                      headers,
-                                                                  body:
-                                                                      jsonEncode({
-                                                                    "productID":
-                                                                        p.ID,
-                                                                    "customerID":
-                                                                        ProfilePage
-                                                                            .user
-                                                                            .id,
-                                                                    "orderid": orders[
-                                                                            orderIndex]
-                                                                        .orderId,
-                                                                    "satisfactionRate":
-                                                                        p.score
-                                                                  }));
-                                                          var decoded = json
-                                                              .decode(response
-                                                                  .body);
-                                                          print(decoded);
-                                                        },
-                                                        icon:
-                                                            Icon(Icons.check)),
-                                                  ),
-                                                  CircleAvatar(
-                                                    backgroundColor:
-                                                        Colors.blueGrey,
-                                                    child: IconButton(
-                                                        onPressed: () {
-                                                          if (p.score > 1) {
-                                                            setState(() {
-                                                              p.score--;
-                                                            });
-                                                          }
-                                                        },
-                                                        icon: Icon(Icons
-                                                            .keyboard_arrow_down)),
-                                                  ),
-                                                  SizedBox(
-                                                    height: 5,
-                                                  )
                                                 ],
                                               ),
                                             ),
@@ -401,13 +331,13 @@ class _UserOrderPageState extends State<UserOrderPage> {
                             borderRadius: BorderRadius.circular(10)),
                         child: Text(
                           orders[orderIndex].statusID == 1
-                              ? 'waiting for expert to confirm'
+                              ? 'waiting for you to confirm'
                               : orders[orderIndex].statusID == 2
-                                  ? 'now you can pay'
+                                  ? 'user can pay'
                                   : orders[orderIndex].statusID == 3
                                       ? 'success'
                                       : orders[orderIndex].statusID == 4
-                                          ? 'waiting for expert to cancel'
+                                          ? 'user want to cancel'
                                           : '',
                           style: TextStyle(fontSize: 20),
                         ),
@@ -423,10 +353,10 @@ class _UserOrderPageState extends State<UserOrderPage> {
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                                 primary: Colors.grey[200]),
-                            onPressed: orders[orderIndex].statusID == 2
+                            onPressed: orders[orderIndex].statusID == 1
                                 ? () async {
                                     final Uri url = Uri.parse(
-                                        "${MyApp.url}/finalizing-order");
+                                        "${MyApp.url}/customer-order-confirmation");
                                     final headers = {
                                       'Content-Type': 'application/json'
                                     };
@@ -437,10 +367,12 @@ class _UserOrderPageState extends State<UserOrderPage> {
                                         }));
                                     var decoded = json.decode(response.body);
                                     print(decoded);
-                                    getOrders();
+                                    setState(() {
+                                      getOrders();
+                                    });
                                   }
                                 : null,
-                            child: Text('pay \$'),
+                            child: Text(' confirm '),
                           ),
                         ),
                       ),
@@ -450,42 +382,20 @@ class _UserOrderPageState extends State<UserOrderPage> {
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                                 primary: Colors.redAccent),
-                            onPressed: orders[orderIndex].statusID <= 2
-                                ? () async {
-                                    if (orders[orderIndex].statusID == 1) {
-                                      final Uri url = Uri.parse(
-                                          "${MyApp.url}/delete-order");
-                                      final headers = {
-                                        'Content-Type': 'application/json'
-                                      };
-                                      final response = await http.post(url,
-                                          headers: headers,
-                                          body: jsonEncode({
-                                            "orderID":
-                                                orders[orderIndex].orderId
-                                          }));
-                                      var decoded = json.decode(response.body);
-                                      print(decoded);
-                                      getOrders();
-                                    } else if (orders[orderIndex].statusID ==
-                                        2) {
-                                      final Uri url = Uri.parse(
-                                          "${MyApp.url}/cancel-order");
-                                      final headers = {
-                                        'Content-Type': 'application/json'
-                                      };
-                                      final response = await http.post(url,
-                                          headers: headers,
-                                          body: jsonEncode({
-                                            "orderID":
-                                                orders[orderIndex].orderId
-                                          }));
-                                      var decoded = json.decode(response.body);
-                                      print(decoded);
-                                      getOrders();
-                                    }
-                                  }
-                                : null,
+                            onPressed: () async {
+                              final Uri url =
+                                  Uri.parse("${MyApp.url}/delete-order");
+                              final headers = {
+                                'Content-Type': 'application/json'
+                              };
+                              final response = await http.post(url,
+                                  headers: headers,
+                                  body: jsonEncode(
+                                      {"orderID": orders[orderIndex].orderId}));
+                              var decoded = json.decode(response.body);
+                              print(decoded);
+                              getOrders();
+                            },
                             child: Icon(Icons.delete_outline),
                           ),
                         ),
@@ -508,7 +418,7 @@ class _UserOrderPageState extends State<UserOrderPage> {
                                     width: 5,
                                   ),
                                   Text(
-                                    '   ${orders[orderIndex].confirmationDate?.substring(5, 10)}     ${orders[orderIndex].confirmationDate?.substring(11, 16)}',
+                                    '  ${orders[orderIndex].confirmationDate}',
                                     style: TextStyle(fontSize: 20),
                                   ),
                                 ],

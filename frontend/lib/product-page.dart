@@ -361,7 +361,7 @@ class _ProductPageState extends State<ProductPage> {
                           ),
                           TextSpan(
                             text:
-                                ' \$${product.sellPrice.toDouble() - (product.sellPrice.toDouble() * product.discountedPrice.toDouble() / 100)} ',
+                                ' \$${(product.sellPrice.toDouble() - (product.sellPrice.toDouble() * product.discountedPrice.toDouble() / 100)).toStringAsFixed(2)} ',
                             style: const TextStyle(
                               color: Colors.black,
                               fontSize: 20,

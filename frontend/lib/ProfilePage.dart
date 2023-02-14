@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:online_shop/ExpertOrderPage.dart';
 import 'package:online_shop/NewProductPage.dart';
 import 'package:online_shop/OrdersPage.dart';
 import 'package:online_shop/main.dart';
@@ -175,22 +176,27 @@ class _AdminProfileState extends State<AdminProfile> {
                 padding: const EdgeInsets.all(8.0),
                 child: ElevatedButton(
                   onPressed: () {
-                    ProfilePage.isAdmin = false;
-                    ProfilePage.logedIn = false;
-                    _function();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return ExpertOrderPage();
+                        },
+                      ),
+                    );
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'logout',
+                        'Orders',
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(
                         width: 10,
                       ),
-                      Icon(Icons.logout)
+                      Icon(Icons.shopping_basket_sharp)
                     ],
                   ),
                 ),
@@ -230,6 +236,36 @@ class _AdminProfileState extends State<AdminProfile> {
                         width: 10,
                       ),
                       Icon(Icons.add)
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 15),
+              height: 50,
+              decoration:
+                  BoxDecoration(borderRadius: BorderRadius.circular(30)),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    ProfilePage.isAdmin = false;
+                    ProfilePage.logedIn = false;
+                    _function();
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'logout',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Icon(Icons.logout)
                     ],
                   ),
                 ),
