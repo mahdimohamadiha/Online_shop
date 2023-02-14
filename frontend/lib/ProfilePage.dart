@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:online_shop/NewProductPage.dart';
+import 'package:online_shop/OrdersPage.dart';
 import 'package:online_shop/main.dart';
 import 'package:online_shop/product.dart';
 import 'package:online_shop/user.dart';
@@ -408,23 +409,61 @@ class _UserprofileState extends State<Userprofile> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(25),
+                  padding: const EdgeInsets.only(left: 25, right: 25, top: 20),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return UserOrderPage();
+                          },
+                        ),
+                      );
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'orders',
+                          style: TextStyle(fontSize: 15),
+                        ),
+                        SizedBox(
+                          width: 20,
+                        ),
+                        Icon(Icons.production_quantity_limits),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 5,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25),
                   child: ElevatedButton(
                     onPressed: () {
                       _function();
                       ProfilePage.logedIn = false;
                     },
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Icon(Icons.logout),
-                        SizedBox(
-                          width: 10,
+                        Text(
+                          'logout',
+                          style: TextStyle(fontSize: 15),
                         ),
-                        Text('logout'),
+                        SizedBox(
+                          width: 20,
+                        ),
+                        Icon(Icons.logout),
                       ],
                     ),
                   ),
-                )
+                ),
+                SizedBox(
+                  height: 10,
+                ),
               ],
               crossAxisAlignment: CrossAxisAlignment.start,
             ),

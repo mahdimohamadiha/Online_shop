@@ -14,6 +14,7 @@ class Product {
   late int stock;
   late int status;
   late int categoryCode;
+  int score = 0;
 
   Product.product(
     this.ID,
@@ -28,17 +29,12 @@ class Product {
     this.stock,
     this.categoryCode,
   );
-  Product.productAsOrder(
-      this.ID,
-      this.name,
-      this.publisher,
-      this.sellPrice,
-      this.buyPrice,
-      this.discription,
-      this.imageURL,
-      this.gameReleaseDate,
-      this.orderID,
-      this.status);
+  Product.order(
+    this.ID,
+    this.name,
+    this.sellPrice,
+    this.discountedPrice,
+  );
 
   Product.homePage(
     this.name,
@@ -50,7 +46,12 @@ class Product {
     this.gameReleaseDate,
   );
   Product.shoppingCart(
-      this.ID, this.name, this.imageURL, this.sellPrice, this.discountedPrice);
+    this.ID,
+    this.name,
+    this.imageURL,
+    this.sellPrice,
+    this.discountedPrice,
+  );
   Product.searchList(
     this.name,
     this.ID,

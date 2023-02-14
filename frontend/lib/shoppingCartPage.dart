@@ -241,7 +241,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                                 ),
                                 TextSpan(
                                   text:
-                                      ' ${100 - ((sumOfDiscountPrices * 100) / sumOfPrices)} % ',
+                                      ' ${(100 - ((sumOfDiscountPrices * 100) / sumOfPrices)).toStringAsFixed(0)} % ',
                                   style: const TextStyle(
                                     color: Colors.black,
                                     fontSize: 15,
