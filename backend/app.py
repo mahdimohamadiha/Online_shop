@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 import psycopg2
 import time
+import uvicorn
 
 app = FastAPI()
 
@@ -130,7 +131,7 @@ def productCategories(req: dict):
 @app.post('/finalizing-order')
 def finalizingOrder(req: dict):
     conn, cur = create_connection()
-    update_script = 'UPDATE "OnlineShop".orders SET shippedDate = %s, status = %s where orderID = %s'
+    update_script = 'UPDATE "OnlineShop".orders SET shippedDate = %s, statusID = %s where orderID = %s'
     update_value = (shippedTime() , 3, req["orderID"])
     cur.execute(update_script, update_value)
     conn.commit()
@@ -154,9 +155,12 @@ def cancelOrder(req: dict):
 @app.post('/registration-satisfaction')
 def registrationSatisfaction(req: dict):
     conn, cur = create_connection()
-    update_script = 'UPDATE "OnlineShop".orders SET satisfaction = %s where orderID = %s'
-    update_value = (req["satisfaction"], req["orderID"])
+    update_script = 'update "OnlineShop".orderdetails set satisfaction = true where productid = %s and orderid = %s'
+    update_value = (req["productID"], req["orderid"])
     cur.execute(update_script, update_value)
+    insert_script = 'insert into "OnlineShop".satisfaction values (%s, %s, %s, %s)'
+    insert_value = (req["productID"], req["customerID"], req["satisfactionRate"], localTime())
+    cur.execute(insert_script, insert_value)
     conn.commit()
     
     return {"isRegistrationSatisfaction": True}
@@ -403,8 +407,63 @@ def getExpert(req: dict):
             
     return expert
 
+@app.post('/get-stock-notice')
+def getStockNotice(req: dict):
+    conn, cur = create_connection()
+    select_script = 'select * from "OnlineShop".stocknotices s where s.productid = %s and s.customerid = %s'
+    select_value = (req["productID"], req["customerID"])
+    cur.execute(select_script, select_value)
+    for record in cur.fetchall():
+        if record[2] == False:
+            return {"isReadyStockNotice": True}
+        else:
+            return {"isReadyStockNotice": False}
+    return {"isReadyStockNotice": True}
+
+@app.post('/add-stock-notices')
+def addStockNotices(req: dict):
+    conn, cur = create_connection()
+    select_script = 'select * from "OnlineShop".stocknotices s where s.productid = %s and s.customerid = %s'
+    select_value = (req["productID"], req["customerID"])
+    cur.execute(select_script, select_value)
+    if cur.fetchone() == None:
+        insert_script = 'insert into "OnlineShop".stocknotices values (%s , %s, %s)'
+        insert_value = (req["productID"], req["customerID"], True)
+        cur.execute(insert_script, insert_value)
+        conn.commit() 
+        return {"isAddStockNotices": True}
+    else:
+        update_script = 'update "OnlineShop".stocknotices set stocknotice = true where productid = %s and customerid = %s'
+        update_value = (req["productID"], req["customerID"])
+        cur.execute(update_script, update_value)
+        conn.commit() 
+        return {"isAddStockNotices": True}
+
+@app.post('/delete-stock-notices')
+def deleteStockNotices(req: dict):
+    conn, cur = create_connection()
+    update_script = 'update "OnlineShop".stocknotices set stocknotice = false where productid = %s and customerid = %s'
+    update_value = (req["productID"], req["customerID"])
+    cur.execute(update_script, update_value)
+    conn.commit() 
+    return {"isDeleteStockNotices": True}
 
 
+@app.post('/stock-notices')
+def stockNotices(req: dict):
+    products = []
+    conn, cur = create_connection()
+    select_script = ''' select p.productid ,p.productname ,p.stock 
+                        from "OnlineShop".stocknotices s join "OnlineShop".products p on s.productid = p.productid 
+                        where s.customerid = %s and s.stocknotice = true and p.stock != 0 '''
+    select_value = (str(req["customerID"]))
+    cur.execute(select_script, select_value)
+    for record in cur.fetchall():
+        products.append({"productid": record[0],
+                         "productname": record[1],
+                         "stock": record[2]})
+    return products
 
 
-
+if __name__ == '__main__':
+    uvicorn.run("app:app", reload=True)
