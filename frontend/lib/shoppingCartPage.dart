@@ -232,7 +232,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                               ),
                               children: <TextSpan>[
                                 TextSpan(
-                                  text: '\$${sumOfPrices}',
+                                  text: '\$${sumOfPrices.toStringAsFixed(2)}',
                                   style: const TextStyle(
                                     fontSize: 20,
                                     color: Colors.black,
@@ -248,7 +248,8 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                                   ),
                                 ),
                                 TextSpan(
-                                  text: ' $sumOfDiscountPrices ',
+                                  text:
+                                      ' ${sumOfDiscountPrices.toStringAsFixed(2)} ',
                                   style: const TextStyle(
                                     color: Colors.black,
                                     fontSize: 20,

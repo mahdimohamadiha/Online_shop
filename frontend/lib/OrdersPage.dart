@@ -268,37 +268,43 @@ class _UserOrderPageState extends State<UserOrderPage> {
                                                     backgroundColor:
                                                         Colors.blueGrey,
                                                     child: IconButton(
-                                                        onPressed: () async {
-                                                          final Uri url = Uri.parse(
-                                                              "${MyApp.url}/registration-satisfaction");
-                                                          final headers = {
-                                                            'Content-Type':
-                                                                'application/json'
-                                                          };
-                                                          final response =
-                                                              await http.post(
-                                                                  url,
-                                                                  headers:
-                                                                      headers,
-                                                                  body:
-                                                                      jsonEncode({
-                                                                    "productID":
-                                                                        p.ID,
-                                                                    "customerID":
-                                                                        ProfilePage
-                                                                            .user
-                                                                            .id,
-                                                                    "orderid": orders[
-                                                                            orderIndex]
-                                                                        .orderId,
-                                                                    "satisfactionRate":
-                                                                        p.score
-                                                                  }));
-                                                          var decoded = json
-                                                              .decode(response
-                                                                  .body);
-                                                          print(decoded);
-                                                        },
+                                                        onPressed: orders[
+                                                                        orderIndex]
+                                                                    .statusID ==
+                                                                3
+                                                            ? () async {
+                                                                final Uri url =
+                                                                    Uri.parse(
+                                                                        "${MyApp.url}/registration-satisfaction");
+                                                                final headers =
+                                                                    {
+                                                                  'Content-Type':
+                                                                      'application/json'
+                                                                };
+                                                                final response =
+                                                                    await http.post(
+                                                                        url,
+                                                                        headers:
+                                                                            headers,
+                                                                        body:
+                                                                            jsonEncode({
+                                                                          "productID":
+                                                                              p.ID,
+                                                                          "customerID": ProfilePage
+                                                                              .user
+                                                                              .id,
+                                                                          "orderid":
+                                                                              orders[orderIndex].orderId,
+                                                                          "satisfactionRate":
+                                                                              p.score
+                                                                        }));
+                                                                var decoded =
+                                                                    json.decode(
+                                                                        response
+                                                                            .body);
+                                                                print(decoded);
+                                                              }
+                                                            : null,
                                                         icon:
                                                             Icon(Icons.check)),
                                                   ),
@@ -366,7 +372,7 @@ class _UserOrderPageState extends State<UserOrderPage> {
                               ),
                               TextSpan(
                                 text:
-                                    ' ${orders[orderIndex].sumOfDiscountPrices} ',
+                                    ' ${orders[orderIndex].sumOfDiscountPrices.toStringAsFixed(2)} ',
                                 style: const TextStyle(
                                   color: Colors.black,
                                   fontSize: 20,

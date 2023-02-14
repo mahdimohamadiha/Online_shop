@@ -34,7 +34,11 @@ class _ExpertOrderPageState extends State<ExpertOrderPage> {
     final headers = {'Content-Type': 'application/json'};
     final response = await http.get(url, headers: headers);
     List<dynamic> decoded = json.decode(response.body);
-    orders = [];
+    setState(() {
+      orders = [];
+    });
+
+    print(decoded);
     for (int x = 0; x < decoded.length; x++) {
       Order order = Order.expert(
         decoded[x]['orderID'],
@@ -296,7 +300,7 @@ class _ExpertOrderPageState extends State<ExpertOrderPage> {
                               ),
                               TextSpan(
                                 text:
-                                    ' ${orders[orderIndex].sumOfDiscountPrices} ',
+                                    ' ${orders[orderIndex].sumOfDiscountPrices.toStringAsFixed(2)} ',
                                 style: const TextStyle(
                                   color: Colors.black,
                                   fontSize: 20,

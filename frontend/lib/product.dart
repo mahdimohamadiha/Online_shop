@@ -14,7 +14,7 @@ class Product {
   late int stock;
   late int status;
   late int categoryCode;
-  int score = 0;
+  int score = 1;
 
   Product.product(
     this.ID,
