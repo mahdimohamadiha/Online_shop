@@ -143,8 +143,8 @@ def finalizingOrder(req: dict):
         score = record[0] + 20
     if score >= 100:
         specialMode = True
-    update_script = 'update "OnlineShop".customers set score = %s where customerid = %s'
-    update_value = (score ,str(req["customerid"]))
+    update_script = 'update "OnlineShop".customers set score = %s, specialmode = %s where customerid = %s'
+    update_value = (score , specialMode,str(req["customerid"]))
     cur.execute(update_script, update_value)
     conn.commit()
     
@@ -599,6 +599,16 @@ def addComment(req: dict):
     insert_script = 'insert into "OnlineShop"."comments" values (%s ,%s , %s, %s, False, %s)'
     insert_value = (id,req["productID"], req["customerID"], req["textComment"], req["commentDate"])
     cur.execute(insert_script, insert_value)
+    select_script = 'select c.score from "OnlineShop".customers c where c.customerid = %s'
+    select_value = (str(req["customerID"]))
+    cur.execute(select_script, select_value)
+    for record in cur.fetchall():
+        score = record[0] + 10
+    if score >= 100:
+        specialMode = True
+    update_script = 'update "OnlineShop".customers set score = %s, specialmode = %s where customerid = %s'
+    update_value = (score , specialMode,str(req["customerID"]))
+    cur.execute(update_script, update_value)
     conn.commit()
     return {"isAddComment": True}
 
@@ -641,8 +651,8 @@ def getComment(req: dict):
         
     return comment
 
-@app.post('/confirmation-commit')
-def confirmationCommit(req: dict):
+@app.post('/confirmation-comment')
+def confirmationComment(req: dict):
     conn, cur = create_connection()
     boole = False
     select_script = ''' select * from "OnlineShop".confirmationrejection c where c.commentid = %s and c.customerid = %s '''
@@ -654,6 +664,16 @@ def confirmationCommit(req: dict):
         insert_script = 'insert into "OnlineShop".confirmationrejection values (%s,%s,true)'
         insert_value = (req["commentid"], req["customerid"])
         cur.execute(insert_script, insert_value)
+        select_script = 'select c.score from "OnlineShop".customers c where c.customerid = %s'
+        select_value = (str(req["customerid"]))
+        cur.execute(select_script, select_value)
+        for record in cur.fetchall():
+            score = record[0] + 5
+        if score >= 100:
+            specialMode = True
+        update_script = 'update "OnlineShop".customers set score = %s, specialmode = %s where customerid = %s'
+        update_value = (score , specialMode,str(req["customerid"]))
+        cur.execute(update_script, update_value)
         conn.commit()
     else:
         update_script = 'UPDATE "OnlineShop".confirmationrejection c SET conrej = true where c.commentid = %s and c.customerid = %s'
@@ -662,8 +682,8 @@ def confirmationCommit(req: dict):
         conn.commit()
     return {"isConfirmationCommit": True}
 
-@app.post('/rejection-commit')
-def rejectionCommit(req: dict):
+@app.post('/rejection-comment')
+def rejectionComment(req: dict):
     conn, cur = create_connection()
     boole = False
     select_script = ''' select * from "OnlineShop".confirmationrejection c where c.commentid = %s and c.customerid = %s '''
@@ -675,6 +695,16 @@ def rejectionCommit(req: dict):
         insert_script = 'insert into "OnlineShop".confirmationrejection values (%s,%s,false)'
         insert_value = (req["commentid"], req["customerid"])
         cur.execute(insert_script, insert_value)
+        select_script = 'select c.score from "OnlineShop".customers c where c.customerid = %s'
+        select_value = (str(req["customerid"]))
+        cur.execute(select_script, select_value)
+        for record in cur.fetchall():
+            score = record[0] + 5
+        if score >= 100:
+            specialMode = True
+        update_script = 'update "OnlineShop".customers set score = %s, specialmode = %s where customerid = %s'
+        update_value = (score , specialMode,str(req["customerid"]))
+        cur.execute(update_script, update_value)
         conn.commit()
     else:
         update_script = 'UPDATE "OnlineShop".confirmationrejection c SET conrej = false where c.commentid = %s and c.customerid = %s'
@@ -701,14 +731,16 @@ def getCommentExpert(req: dict):
         })   
     return comment
 
-@app.post('/confirmation-admin-commit')
-def confirmationAdminCommit(req: dict):
+@app.post('/confirmation-admin-comment')
+def confirmationAdminComment(req: dict):
     conn, cur = create_connection()
     update_script = 'update "OnlineShop"."comments" c set confirmationadmin = true where c.commentid = %s '
     update_value = (str(req["commentid"]))
     cur.execute(update_script, update_value)
     conn.commit()
     return {"isConfirmationAdminCommit": True}
+
+@app.post()
 
         
 if __name__ == '__main__':
