@@ -14,6 +14,14 @@ def shippedTime():
     shippedTime = time.ctime(time.time() + 432000)
     return shippedTime
 
+def Time():
+    Time = time.time()
+    return Time
+
+def eTime(s):
+    eTime = time.ctime(s)
+    return eTime
+
 
 def create_connection():
         conn = psycopg2.connect(
@@ -740,8 +748,71 @@ def confirmationAdminComment(req: dict):
     conn.commit()
     return {"isConfirmationAdminCommit": True}
 
-@app.post()
+@app.post('/discount-notice')
+def discountNotice(req: dict):
+    conn, cur = create_connection()
+    products = []
+    specialMode = False
+    select_script = '''select c.specialmode from "OnlineShop".customers c where c.customerid = %s '''
+    select_value = (str(req["customerid"]))
+    cur.execute(select_script, select_value)
+    for record in cur.fetchall():
+        specialMode = record[0]
+    if specialMode == True:
+        select_script = '''select p.productid ,p.productname ,p.saleprice ,p.discountedprice from "OnlineShop".products p where p.saleprice != p.discountedprice '''
+        select_value = (str(req["customerid"]))
+        cur.execute(select_script, select_value)
+        for record in cur.fetchall():
+            products.append({
+                "productid": record[0],
+                "productname": record[1],
+                "saleprice": record[2],
+                "discountedprice": record[3],
+            })
+    return products
 
+@app.get('/amount-comments')
+def amountComments():
+    conn, cur = create_connection()
+    comments = []
+    sweek = 0
+    eweek = 0
+    j = 0
+    s = Time()
+    for i in range(10):
+        sweek = eTime(s - 604800) 
+        eweek = eTime(s) 
+        select_script = '''select * from "OnlineShop"."comments" c where c.commentdate between %s and %s '''
+        select_value = (sweek, eweek)
+        cur.execute(select_script, select_value)
+        for record in cur.fetchall():
+            j = j + 1
+        comments.append({
+            "sweek": sweek,
+            "eweek": eweek,
+            "amountComment": j
+        })
+        s = s - 604800
+        j = 0
+    return comments
+
+@app.post('/get-comment-customer')
+def getCommentCustomer(req: dict):
+    conn, cur = create_connection()
+    comments = []
+    select_script = '''select p.productname ,c.textcomment ,c.confirmationadmin ,c.commentdate 
+    from "OnlineShop"."comments" c join "OnlineShop".products p on c.productid = p.productid  
+    where c.customerid = %s'''
+    select_value = (str(req["customerid"]))
+    cur.execute(select_script, select_value)
+    for record in cur.fetchall():
+        comments.append({
+            "productname": record[0],
+            "textcomment": record[1],
+            "confirmationadmin": record[2],
+            "commentdate": record[3]
+        })
+    return comments
         
 if __name__ == '__main__':
     uvicorn.run("app:app", reload=True)
