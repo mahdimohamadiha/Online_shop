@@ -3,12 +3,15 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:online_shop/Comment.dart';
 import 'package:online_shop/ExpertOrderPage.dart';
 import 'package:online_shop/NewProductPage.dart';
 import 'package:online_shop/OrdersPage.dart';
 import 'package:online_shop/main.dart';
 import 'package:online_shop/product.dart';
 import 'package:online_shop/user.dart';
+
+import 'Reports.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -215,7 +218,7 @@ class _AdminProfileState extends State<AdminProfile> {
                       context,
                       MaterialPageRoute(
                         builder: (context) {
-                          return ExpertOrderPage();
+                          return ReportPage();
                         },
                       ),
                     );
@@ -340,7 +343,7 @@ class _UserprofileState extends State<Userprofile> {
                   children: [
                     Container(
                       margin: EdgeInsets.only(
-                          right: 150, left: 30, bottom: 20, top: 20),
+                          right: 50, left: 30, bottom: 20, top: 20),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(120),
                         child: Image.asset(

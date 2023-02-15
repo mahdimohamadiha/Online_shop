@@ -10,6 +10,7 @@ import 'package:online_shop/home-page.dart';
 import 'package:online_shop/product.dart';
 import 'package:online_shop/user.dart';
 
+import 'Comment.dart';
 import 'main.dart';
 
 class Order {
@@ -126,12 +127,16 @@ class _UserOrderPageState extends State<UserOrderPage> {
         builder: (context) {
           return AlertDialog(
             title: Text('Comment '),
-            content: TextField(
-              maxLines: 2,
-              controller: _textFieldController,
-              decoration: InputDecoration(
-                hintText: "Enter Text",
-              ),
+            content: Column(
+              children: [
+                TextField(
+                  maxLines: 2,
+                  controller: _textFieldController,
+                  decoration: InputDecoration(
+                    hintText: "Enter Text",
+                  ),
+                ),
+              ],
             ),
             actions: [
               ElevatedButton(
@@ -140,7 +145,7 @@ class _UserOrderPageState extends State<UserOrderPage> {
                   DateTime now = DateTime.now();
                   String formattedDate = DateFormat('yyyy-MM-dd').format(now);
                   print(formattedDate);
-                  final Uri url = Uri.parse("${MyApp.url}/get-product-order");
+                  final Uri url = Uri.parse("${MyApp.url}/add-comment");
                   final headers = {'Content-Type': 'application/json'};
                   final response = await http.post(url,
                       headers: headers,
@@ -293,20 +298,46 @@ class _UserOrderPageState extends State<UserOrderPage> {
                                                   ),
                                                 ),
                                                 orders[orderIndex].statusID == 3
-                                                    ? ElevatedButton(
-                                                        style: ElevatedButton
-                                                            .styleFrom(
-                                                                primary: Colors
-                                                                    .grey[300]),
-                                                        onPressed: () {
-                                                          _displayDialog(
-                                                              context,
-                                                              p.ID,
-                                                              orders[orderIndex]
-                                                                  .userId);
-                                                        },
-                                                        child:
-                                                            Text('add comment'))
+                                                    ? Row(
+                                                        children: [
+                                                          ElevatedButton(
+                                                              style: ElevatedButton
+                                                                  .styleFrom(
+                                                                      primary: Colors
+                                                                              .grey[
+                                                                          300]),
+                                                              onPressed: () {
+                                                                _displayDialog(
+                                                                    context,
+                                                                    p.ID,
+                                                                    orders[orderIndex]
+                                                                        .userId);
+                                                              },
+                                                              child: Text(
+                                                                  'add comment')),
+                                                          ElevatedButton(
+                                                              style: ElevatedButton
+                                                                  .styleFrom(
+                                                                      primary: Colors
+                                                                              .grey[
+                                                                          300]),
+                                                              onPressed: () {
+                                                                Navigator.push(
+                                                                  context,
+                                                                  MaterialPageRoute(
+                                                                    builder:
+                                                                        (context) {
+                                                                      return userComment(
+                                                                          id: p
+                                                                              .ID);
+                                                                    },
+                                                                  ),
+                                                                );
+                                                              },
+                                                              child: Text(
+                                                                  'comments')),
+                                                        ],
+                                                      )
                                                     : Container()
                                               ],
                                             ),
@@ -627,6 +658,166 @@ class _UserOrderPageState extends State<UserOrderPage> {
                 );
               },
             ),
+    );
+  }
+}
+
+class userComment extends StatefulWidget {
+  const userComment({Key? key, required this.id}) : super(key: key);
+  final int id;
+  @override
+  State<userComment> createState() => _userCommentState(this.id);
+}
+
+class _userCommentState extends State<userComment> {
+  final int id;
+  int temp = 0;
+
+  List<Comment> comments = [];
+
+  _userCommentState(this.id);
+  Future<void> getUserComments() async {
+    temp = 0;
+    final Uri url = Uri.parse("${MyApp.url}/get-comment");
+    final headers = {'Content-Type': 'application/json'};
+    final response = await http.post(
+      url,
+      headers: headers,
+      body: json.encode({"productid": id}),
+    );
+    List<dynamic> decoded = json.decode(response.body);
+    comments = [];
+    setState(() {
+      for (int x = 0; x < decoded.length; x++) {
+        Comment comment = Comment.user(
+          decoded[x]['commentid'],
+          decoded[x]['textcomment'],
+          decoded[x]['commentdate'],
+          decoded[x]['customerfullname'],
+          decoded[x]['confirmation'],
+          decoded[x]['rejection'],
+        );
+        comments.add(comment);
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    getUserComments();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: CustomScrollView(slivers: [
+        SliverList(
+          delegate: SliverChildListDelegate(
+            List.generate(
+              comments.length,
+              (index) {
+                return Padding(
+                  padding: EdgeInsets.all(10),
+                  child: Container(
+                    decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(15)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            ' ${comments[index].date.substring(0, 10)}',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 15),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                ' ${comments[index].userName} :',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 20),
+                              ),
+                              Row(
+                                children: [
+                                  TextButton(
+                                    child: Text('-'),
+                                    onPressed: () async {
+                                      print(temp.toString());
+
+                                      final Uri url = Uri.parse(
+                                          "${MyApp.url}/rejection-commit");
+                                      final headers = {
+                                        'Content-Type': 'application/json'
+                                      };
+                                      final response = await http.post(
+                                        url,
+                                        headers: headers,
+                                        body: json.encode({
+                                          "commentid": id,
+                                          "customerid": id,
+                                        }),
+                                      );
+                                      getUserComments();
+                                    },
+                                  ),
+                                  Text(
+                                      '${comments[index].likes - comments[index].dislikes}'),
+                                  TextButton(
+                                    child: Text('+'),
+                                    onPressed: () async {
+                                      final Uri url = Uri.parse(
+                                          "${MyApp.url}/confirmation-commit");
+                                      final headers = {
+                                        'Content-Type': 'application/json'
+                                      };
+                                      final response = await http.post(
+                                        url,
+                                        headers: headers,
+                                        body: json.encode({
+                                          "commentid": id,
+                                          "customerid": id,
+                                        }),
+                                      );
+                                      getUserComments();
+                                    },
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            width: 400,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                    color: Colors.white70, width: 1)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(comments[index].textComment),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ]),
     );
   }
 }

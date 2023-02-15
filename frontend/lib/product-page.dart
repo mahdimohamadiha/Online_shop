@@ -23,13 +23,76 @@ class _ProductPageState extends State<ProductPage> {
   Product product;
 
   _ProductPageState(this.product);
+  Future<void> getExpertComments() async {
+    final Uri url = Uri.parse("${MyApp.url}/get-comment-expert");
+    final headers = {'Content-Type': 'application/json'};
+    final response = await http.post(
+      url,
+      headers: headers,
+      body: json.encode({"productid": product.ID}),
+    );
+    List<dynamic> decoded = json.decode(response.body);
+    comments = [];
+    setState(() {
+      for (int x = 0; x < decoded.length; x++) {
+        Comment comment = Comment.expert(
+          decoded[x]['commentid'],
+          decoded[x]['textcomment'],
+          decoded[x]['commentdate'],
+          decoded[x]['customerfullname'],
+        );
+        comments.add(comment);
+      }
+    });
+  }
+
+  Future<void> getUserComments() async {
+    final Uri url = Uri.parse("${MyApp.url}/get-comment");
+    final headers = {'Content-Type': 'application/json'};
+    final response = await http.post(
+      url,
+      headers: headers,
+      body: json.encode({"productid": product.ID}),
+    );
+    List<dynamic> decoded = json.decode(response.body);
+    comments = [];
+    setState(() {
+      for (int x = 0; x < decoded.length; x++) {
+        Comment comment = Comment.user(
+          decoded[x]['commentid'],
+          decoded[x]['textcomment'],
+          decoded[x]['commentdate'],
+          decoded[x]['customerfullname'],
+          decoded[x]['confirmation'],
+          decoded[x]['rejection'],
+        );
+        comments.add(comment);
+      }
+    });
+  }
 
   @override
   void initState() {
-    Comment c =
-        Comment('amir', 'in bazi kheiliiiii khoobee', 1, 2, 1, 20, 'date');
-    comments.add(c);
+    if (ProfilePage.isAdmin) {
+      getExpertComments();
+    } else {
+      getUserComments();
+    }
     _ProductPageState(product);
+    //setNotif();
+  }
+
+  Future<void> setNotif() async {
+    final Uri url = Uri.parse("${MyApp.url}/get-stock-notice");
+    final headers = {'Content-Type': 'application/json'};
+    final response = await http.post(url,
+        headers: headers,
+        body: jsonEncode({
+          "productID": product.ID,
+          "customerID": ProfilePage.user.id,
+        }));
+    var decoded = json.decode(response.body);
+    notif = decoded['isReadyStockNotice'];
   }
 
   bool isHover = false;
@@ -214,27 +277,6 @@ class _ProductPageState extends State<ProductPage> {
                       ),
                     ),
                   ),
-                  // SliverList(
-                  //   delegate: SliverChildListDelegate(
-                  //     [
-                  //       SingleChildScrollView(
-                  //         child: ListView.builder(
-                  //             itemCount: 5,
-                  //             physics: NeverScrollableScrollPhysics(),
-                  //             itemBuilder: (context, index) {
-                  //               return ListTile(
-                  //                   leading: const Icon(Icons.list),
-                  //                   trailing: const Text(
-                  //                     "GFG",
-                  //                     style: TextStyle(
-                  //                         color: Colors.green, fontSize: 15),
-                  //                   ),
-                  //                   title: Text("List item $index"));
-                  //             }),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // )
                   const SliverToBoxAdapter(
                     child: Center(
                       child: Text(
@@ -244,7 +286,6 @@ class _ProductPageState extends State<ProductPage> {
                       ),
                     ),
                   ),
-
                   SliverList(
                     delegate: SliverChildListDelegate(
                       List.generate(
@@ -261,6 +302,15 @@ class _ProductPageState extends State<ProductPage> {
                                 children: [
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      ' ${comments[index].date.substring(0, 10)}',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
                                     child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
@@ -271,23 +321,18 @@ class _ProductPageState extends State<ProductPage> {
                                               fontWeight: FontWeight.bold,
                                               fontSize: 20),
                                         ),
-                                        Text(
-                                          ' ${comments[index].date}',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 20),
-                                        ),
-                                        Row(
-                                          children: [
-                                            Text(comments[index]
-                                                .likes
-                                                .toString()),
-                                            Icon(
-                                              Icons.favorite_outlined,
-                                              color: Colors.red,
-                                            ),
-                                          ],
-                                        )
+                                        ProfilePage.isAdmin
+                                            ? Container()
+                                            : Row(
+                                                children: [
+                                                  Text(
+                                                      '${comments[index].likes}'),
+                                                  Icon(
+                                                    Icons.favorite_outlined,
+                                                    color: Colors.red,
+                                                  ),
+                                                ],
+                                              )
                                       ],
                                     ),
                                   ),
@@ -307,6 +352,41 @@ class _ProductPageState extends State<ProductPage> {
                                       ),
                                     ),
                                   ),
+                                  ProfilePage.isAdmin
+                                      ? Row(
+                                          children: [
+                                            Expanded(
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: ElevatedButton(
+                                                  onPressed: () async {
+                                                    final Uri url = Uri.parse(
+                                                        "${MyApp.url}/confirmation-admin-comment");
+                                                    final headers = {
+                                                      'Content-Type':
+                                                          'application/json'
+                                                    };
+                                                    final response =
+                                                        await http.post(url,
+                                                            headers: headers,
+                                                            body: jsonEncode({
+                                                              "commentid":
+                                                                  comments[
+                                                                          index]
+                                                                      .commentID,
+                                                            }));
+                                                    var decoded = json
+                                                        .decode(response.body);
+                                                    getExpertComments();
+                                                  },
+                                                  child: Text('confirm'),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      : Container(),
                                 ],
                               ),
                             ),
@@ -397,14 +477,46 @@ class _ProductPageState extends State<ProductPage> {
                       : ProfilePage.logedIn && product.stock == 0
                           ? Expanded(
                               child: IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    notif = !notif;
-                                  });
-                                },
+                                onPressed: notif
+                                    ? () async {
+                                        final Uri url = Uri.parse(
+                                            "${MyApp.url}/delete-stock-notices");
+                                        final headers = {
+                                          'Content-Type': 'application/json'
+                                        };
+                                        final response = await http.post(url,
+                                            headers: headers,
+                                            body: jsonEncode({
+                                              "productID": product.ID,
+                                              "customerID": ProfilePage.user.id,
+                                            }));
+                                        var decoded =
+                                            json.decode(response.body);
+                                        setState(() {
+                                          notif = !notif;
+                                        });
+                                      }
+                                    : () async {
+                                        final Uri url = Uri.parse(
+                                            "${MyApp.url}/add-stock-notices");
+                                        final headers = {
+                                          'Content-Type': 'application/json'
+                                        };
+                                        final response = await http.post(url,
+                                            headers: headers,
+                                            body: jsonEncode({
+                                              "productID": product.ID,
+                                              "customerID": ProfilePage.user.id,
+                                            }));
+                                        var decoded =
+                                            json.decode(response.body);
+                                        setState(() {
+                                          notif = !notif;
+                                        });
+                                      },
                                 icon: notif
-                                    ? Icon(Icons.notifications_none)
-                                    : Icon(Icons.notifications_active),
+                                    ? Icon(Icons.notifications_active)
+                                    : Icon(Icons.notifications_none),
                               ),
                             )
                           : Container(),
